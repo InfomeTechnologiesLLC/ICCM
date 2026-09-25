@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found — {{ site_settings.site_name|default:"India Church of Christ Mission" }}{% endblock %}
+{% block content %}
+<section class="section text-center">
+  <div class="shell">
+    <p class="eyebrow eyebrow--muted justify-content-center mb-3">404</p>
+    <h1 class="headline-xl mb-3">We couldn't find that page</h1>
+    <p class="body-md text-muted-warm mb-4">The page you're looking for may have moved or no longer exists.</p>
+    <a href="/" class="btn btn-forest btn-lg-soft">Back to Home</a>
+  </div>
+</section>
+{% endblock %}

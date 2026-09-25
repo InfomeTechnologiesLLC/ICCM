@@ -1,0 +1,102 @@
+{% load static %}
+<!-- ============================ Utility bar ============================ -->
+<div class="utility-bar d-none d-md-block">
+  <div class="shell d-flex align-items-center justify-content-between py-2">
+    <div class="d-flex align-items-center gap-2">
+      <span class="material-symbols-outlined ms-14 text-warning">church</span>
+      <span>{{ site_settings.utility_bar_text }}</span>
+    </div>
+    {% if site_settings.email %}
+    <a href="{% url 'website:contact' %}" class="d-inline-flex align-items-center gap-1">
+      <span class="material-symbols-outlined ms-14">mail</span>
+      <span>{{ site_settings.email }}</span>
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ============================== Header =============================== -->
+<header class="site-header">
+  <div class="shell d-flex align-items-center justify-content-between gap-3" style="height:5rem;">
+
+    <a class="brand-lockup" href="{% url 'website:home' %}">
+      {% if site_settings.logo %}
+        <img src="{{ site_settings.logo.url }}" alt="" class="brand-mark" width="32" height="32">
+      {% else %}
+        <img src="{% static 'img/logo-mark.svg' %}" alt="" class="brand-mark" width="32" height="32">
+      {% endif %}
+      <span class="brand-text">
+        <span class="brand-word">{{ site_settings.site_name }}</span>
+        <span class="brand-sub">{{ site_settings.tagline }}</span>
+      </span>
+    </a>
+
+    <nav class="nav nav-main d-none d-xl-flex" aria-label="Primary">
+      {% for item in main_menu %}
+      <a class="nav-link{% if request.path == item.url %} active{% endif %}"
+         {% if request.path == item.url %}aria-current="page"{% endif %}
+         href="{{ item.url }}" {% if item.open_in_new_tab %}target="_blank" rel="noopener"{% endif %}>{{ item.label }}</a>
+      {% empty %}
+      <a class="nav-link{% if request.resolver_match.url_name == 'home' %} active{% endif %}" href="{% url 'website:home' %}">Home</a>
+      <a class="nav-link" href="{% url 'website:about' %}">About</a>
+      <a class="nav-link" href="{% url 'website:church_list' %}">Churches</a>
+      <a class="nav-link" href="{% url 'website:bible_school' %}">Bible School</a>
+      <a class="nav-link" href="{% url 'website:ministry_list' %}">Ministries</a>
+      <a class="nav-link" href="{% url 'website:event_list' %}">Events</a>
+      <a class="nav-link" href="{% url 'website:gallery' %}">Gallery</a>
+      <a class="nav-link" href="{% url 'website:blog_list' %}">Blog</a>
+      <a class="nav-link" href="{% url 'website:contact' %}">Contact</a>
+      {% endfor %}
+    </nav>
+
+    <div class="d-flex align-items-center gap-2">
+      <a href="{% url 'website:contact' %}#support" class="btn btn-brass d-none d-sm-inline-flex">Support the Mission</a>
+      <button class="nav-toggle d-xl-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuPanel" aria-controls="menuPanel" aria-label="Open menu">
+        <span class="material-symbols-outlined ms-24">menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ========================== Mobile menu ============================== -->
+<div class="offcanvas offcanvas-end menu-panel" tabindex="-1" id="menuPanel" aria-labelledby="menuPanelLabel">
+  <div class="offcanvas-header hairline-b">
+    <span class="brand-lockup" id="menuPanelLabel">
+      {% if site_settings.logo %}
+        <img src="{{ site_settings.logo.url }}" alt="" class="brand-mark" width="32" height="32">
+      {% else %}
+        <img src="{% static 'img/logo-mark.svg' %}" alt="" class="brand-mark" width="32" height="32">
+      {% endif %}
+      <span class="brand-text">
+        <span class="brand-word">{{ site_settings.site_name }}</span>
+        <span class="brand-sub">{{ site_settings.tagline }}</span>
+      </span>
+    </span>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body d-flex flex-column">
+    <nav class="nav flex-column" aria-label="Mobile">
+      {% for item in main_menu %}
+      <a class="nav-link" href="{{ item.url }}">{{ item.label }}</a>
+      {% empty %}
+      <a class="nav-link" href="{% url 'website:home' %}">Home</a>
+      <a class="nav-link" href="{% url 'website:about' %}">About</a>
+      <a class="nav-link" href="{% url 'website:church_list' %}">Churches</a>
+      <a class="nav-link" href="{% url 'website:bible_school' %}">Bible School</a>
+      <a class="nav-link" href="{% url 'website:ministry_list' %}">Ministries</a>
+      <a class="nav-link" href="{% url 'website:event_list' %}">Events</a>
+      <a class="nav-link" href="{% url 'website:gallery' %}">Gallery</a>
+      <a class="nav-link" href="{% url 'website:blog_list' %}">Blog</a>
+      <a class="nav-link" href="{% url 'website:contact' %}">Contact</a>
+      {% endfor %}
+    </nav>
+    <div class="mt-4 d-grid gap-2">
+      <a href="{% url 'website:contact' %}#support" class="btn btn-brass btn-lg-soft">Support the Mission</a>
+      <a href="{% url 'website:contact' %}" class="btn btn-forest btn-lg-soft">Contact Us</a>
+    </div>
+    <p class="body-sm text-muted-warm mt-4 mb-0">
+      {{ site_settings.site_name }} Office<br>
+      {{ site_settings.address }}
+    </p>
+  </div>
+</div>

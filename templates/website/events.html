@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Events — {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="shell" style="padding-block:2.5rem 3rem;">
+    <div class="row g-4 align-items-end">
+      <div class="col-lg-7">
+        <span class="chip mb-3"><span class="material-symbols-outlined ms-16">calendar_month</span> Calendar</span>
+        <h1 class="headline-xl mb-3">Events</h1>
+        <p class="body-lg text-muted-warm mb-0" style="max-width:34rem;">Come and join us — there is no need to tell us you are coming, though we are always glad when you do.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if featured_event %}
+<section class="section-sm">
+  <div class="shell">
+    <a href="{{ featured_event.get_absolute_url }}" class="card-warm card-lift d-block p-4 p-lg-5 reveal">
+      <span class="chip chip-brass mb-3">Featured</span>
+      <h2 class="headline-lg mb-2">{{ featured_event.name }}</h2>
+      <p class="body-md text-muted-warm mb-0">{{ featured_event.short_description }} &mdash; {{ featured_event.start_date|date:"d M Y" }}</p>
+    </a>
+  </div>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="shell">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+      <div class="d-flex flex-wrap gap-2" data-filter-group="events">
+        <a href="?filter=upcoming" class="chip chip-filter{% if active_filter == 'upcoming' %} is-active{% endif %}">Upcoming</a>
+        <a href="?filter=past" class="chip chip-filter{% if active_filter == 'past' %} is-active{% endif %}">Past</a>
+      </div>
+      <form method="get" class="d-flex gap-2">
+        {% if active_filter %}<input type="hidden" name="filter" value="{{ active_filter }}">{% endif %}
+        <input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search events" style="max-width:16rem;">
+        <button class="btn btn-quiet" type="submit">Search</button>
+      </form>
+    </div>
+
+    <div class="row g-3 g-lg-4">
+      {% for event in events %}
+      <div class="col-md-6 col-lg-4">
+        <article class="card-warm card-lift h-100 d-flex flex-column reveal">
+          <div class="card-media ratio-media photo-warm">
+            {% if event.featured_image %}<img src="{{ event.featured_image.url }}" alt="{{ event.name }}">{% endif %}
+            {% if event.is_featured %}<span class="media-overlay chip chip-forest" style="left:.75rem;top:.75rem;">Featured</span>{% endif %}
+          </div>
+          <div class="p-3 p-xl-4 d-flex flex-column flex-grow-1">
+            <p class="eyebrow mb-2">{{ event.start_date|date:"d M Y" }}{% if event.venue %} &middot; {{ event.venue }}{% endif %}</p>
+            <h3 class="headline-sm mb-2">{{ event.name }}</h3>
+            <p class="body-sm text-muted-warm flex-grow-1">{{ event.short_description }}</p>
+            <a class="link-arrow mt-3" href="{{ event.get_absolute_url }}">Details <span class="material-symbols-outlined">arrow_forward</span></a>
+          </div>
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12"><p class="text-muted-warm">No events to show right now.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

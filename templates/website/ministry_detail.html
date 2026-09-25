@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ ministry.name }} — {{ site_settings.site_name }}{% endblock %}
+{% block meta_description %}{{ ministry.seo_description|default:ministry.short_description }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="shell" style="padding-block:2.5rem 3rem;">
+    <div class="row g-4 align-items-end">
+      <div class="col-lg-8">
+        <span class="pathway-icon mb-3"><span class="material-symbols-outlined ms-24">{{ ministry.icon|default:"church" }}</span></span>
+        <h1 class="headline-xl mb-3">{{ ministry.name }}</h1>
+        <p class="body-lg text-muted-warm mb-0" style="max-width:34rem;">{{ ministry.short_description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="row g-4 g-xl-5">
+      <div class="col-lg-7">
+        <div class="card-media ratio-media photo-warm reveal mb-4" style="border-radius:var(--r-xl);">
+          {% if ministry.image %}<img src="{{ ministry.image.url }}" alt="{{ ministry.name }}">{% endif %}
+        </div>
+        <div class="body-md text-muted-warm">{{ ministry.description|safe }}</div>
+
+        {% if ministry.gallery.all %}
+        <div class="gallery mt-4">
+          {% for img in ministry.gallery.all %}
+          <a href="{{ img.image.url }}" data-lightbox="{{ img.image.url }}"><img src="{{ img.image.url }}" alt="{{ img.caption }}"></a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="col-lg-5">
+        <div class="card-warm p-4 p-xl-5 sticky-side">
+          <h3 class="headline-sm mb-3">Ministry Details</h3>
+          <ul class="list-unstyled body-sm text-muted-warm d-grid gap-3 mb-4">
+            {% if ministry.leader %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">person</span> Leader: {{ ministry.leader }}</li>{% endif %}
+            {% if ministry.meeting_info %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">schedule</span> {{ ministry.meeting_info }}</li>{% endif %}
+            {% if ministry.location %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">location_on</span> {{ ministry.location }}</li>{% endif %}
+            {% if ministry.phone %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">call</span> <a href="tel:{{ ministry.phone }}">{{ ministry.phone }}</a></li>{% endif %}
+            {% if ministry.email %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">mail</span> <a href="mailto:{{ ministry.email }}">{{ ministry.email }}</a></li>{% endif %}
+          </ul>
+          <a href="{% url 'website:contact' %}" class="btn btn-forest btn-lg-soft w-100">Get Involved</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark">
+      <button type="button" class="btn-close btn-close-white m-2 ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+      <img data-lightbox-img class="w-100" alt="">
+      <p data-lightbox-caption class="text-white text-center p-3 mb-0"></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

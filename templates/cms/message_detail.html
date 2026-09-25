@@ -1,0 +1,27 @@
+{% extends "cms/base.html" %}
+{% block title %}{{ object.name }}{% endblock %}
+{% block content %}
+<a href="{% url 'cms:message_list' %}" class="small">&larr; Back to messages</a>
+<h1 class="h3 mt-2 mb-4">{{ object.subject|default:object.get_reason_display }}</h1>
+
+<div class="stat-card" style="max-width:44rem;">
+  <dl class="row mb-4">
+    <dt class="col-3">From</dt><dd class="col-9">{{ object.name }} &lt;{{ object.email }}&gt;</dd>
+    {% if object.phone %}<dt class="col-3">Phone</dt><dd class="col-9">{{ object.phone }}</dd>{% endif %}
+    <dt class="col-3">Reason</dt><dd class="col-9">{{ object.get_reason_display }}</dd>
+    <dt class="col-3">Received</dt><dd class="col-9">{{ object.created_at|date:"d M Y, H:i" }}</dd>
+  </dl>
+  <p style="white-space:pre-wrap;">{{ object.message }}</p>
+
+  <form method="post" class="d-flex gap-2 mt-4">
+    {% csrf_token %}
+    {% if object.status != 'archived' %}
+    <button type="submit" name="action" value="archive" class="btn btn-outline-secondary btn-sm">Archive</button>
+    {% else %}
+    <button type="submit" name="action" value="unread" class="btn btn-outline-secondary btn-sm">Mark Unread</button>
+    {% endif %}
+    <button type="submit" name="action" value="delete" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this message?');">Delete</button>
+    <a href="mailto:{{ object.email }}" class="btn btn-dark btn-sm ms-auto">Reply by Email</a>
+  </form>
+</div>
+{% endblock %}

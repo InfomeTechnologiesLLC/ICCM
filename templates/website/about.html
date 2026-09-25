@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}About the Mission — {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="shell" style="padding-block:2.5rem 3rem;">
+    <div class="row g-4 align-items-end">
+      <div class="col-lg-7">
+        <h1 class="headline-xl mb-3">{{ page.title }}</h1>
+        <div class="body-lg text-muted-warm mb-0" style="max-width:34rem;">{{ page.introduction|safe }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="story">
+  <div class="shell">
+    <div class="row g-4 g-xl-5 align-items-center">
+      <div class="col-lg-6">
+        <div class="row g-3">
+          <div class="col-7">
+            <div class="card-media ratio-portrait photo-warm reveal" style="border-radius:var(--r-xl);">
+              {% if page.founding_image %}<img src="{{ page.founding_image.url }}" alt="Early days of the mission">
+              {% else %}<img src="{% static 'img/iccm/welcome.jpeg' %}" alt="Thomas and Sali Thomas">{% endif %}
+            </div>
+          </div>
+          <div class="col-5 d-flex align-items-end">
+            <div class="card-media ratio-square photo-warm reveal w-100" style="border-radius:var(--r-xl);">
+              {% if page.today_image %}<img src="{{ page.today_image.url }}" alt="The mission today">
+              {% else %}<img src="{% static 'img/iccm/about-today.jpeg' %}" alt="The mission today">{% endif %}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <p class="eyebrow eyebrow--muted mb-2">Our Story</p>
+        <h2 class="headline-lg mb-3">From Kerala in 1996 to Punjab Today</h2>
+        <div class="body-md text-muted-warm mb-4">{{ page.history|safe }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if timeline %}
+<section class="section bg-surface-low">
+  <div class="shell">
+    <div class="text-center mb-5"><h2 class="headline-lg mb-3">Our Timeline</h2></div>
+    <div class="row g-3">
+      {% for t in timeline %}
+      <div class="col-md-3">
+        <div class="card-warm p-3 h-100 reveal">
+          <p class="headline-sm mb-1" style="color:var(--primary-container);">{{ t.year }}</p>
+          <p class="label-md mb-1">{{ t.title }}</p>
+          <p class="body-sm text-muted-warm mb-0">{{ t.description }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section" id="mission-vision">
+  <div class="shell">
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card-warm card-lift h-100 p-4 reveal">
+          <h3 class="headline-sm mb-2">Our Mission</h3>
+          <div class="body-md text-muted-warm mb-0">{{ page.mission_statement|safe }}</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card-warm card-lift h-100 p-4 reveal">
+          <h3 class="headline-sm mb-2">Our Vision</h3>
+          <div class="body-md text-muted-warm mb-0">{{ page.vision_statement|safe }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if beliefs %}
+<section class="section" id="beliefs">
+  <div class="shell">
+    <div class="row g-4 g-xl-5">
+      <div class="col-lg-4">
+        <div class="sticky-side">
+          <p class="eyebrow eyebrow--muted mb-2">Our Confession</p>
+          <h2 class="headline-lg mb-3">What We Believe</h2>
+          <p class="body-md text-muted-warm mb-4">
+            India Church of Christ Mission stands for New Testament Christianity. We give
+            priority to the Great Commission of Jesus.
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div class="accordion accordion-warm" id="beliefsAccordion">
+          {% for belief in beliefs %}
+          <div class="accordion-item">
+            <h3 class="accordion-header">
+              <button class="accordion-button{% if not forloop.first %} collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#belief{{ belief.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="belief{{ belief.id }}">
+                <span class="label-sm text-outline me-3">{{ forloop.counter|stringformat:"02d" }}</span> {{ belief.title }}
+              </button>
+            </h3>
+            <div id="belief{{ belief.id }}" class="accordion-collapse collapse{% if forloop.first %} show{% endif %}" data-bs-parent="#beliefsAccordion">
+              <div class="accordion-body">{{ belief.description }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if leaders %}
+<section class="section bg-surface-low" id="leaders">
+  <div class="shell">
+    <div class="text-center mb-5">
+      <p class="eyebrow eyebrow--muted justify-content-center mb-2">Our Team</p>
+      <h2 class="headline-lg mb-3">Leadership</h2>
+    </div>
+    <div class="row g-3 g-lg-4 justify-content-center">
+      {% for leader in leaders %}
+      <div class="col-sm-6 col-lg-4">
+        <article class="card-warm card-lift reveal d-flex flex-column h-100">
+          <div class="card-media ratio-portrait photo-warm">
+            {% if leader.photo %}<img src="{{ leader.photo.url }}" alt="{{ leader.name }}">{% endif %}
+          </div>
+          <div class="p-3 p-xl-4 d-flex flex-column flex-grow-1">
+            <p class="eyebrow mb-1">{{ leader.role }}</p>
+            <h3 class="headline-sm mb-2">{{ leader.name }}</h3>
+            <p class="body-sm text-muted-warm flex-grow-1">{{ leader.bio }}</p>
+            <a class="link-arrow mt-2" href="{% url 'website:contact' %}">Get in touch <span class="material-symbols-outlined">arrow_forward</span></a>
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section-sm">
+  <div class="shell">
+    <div class="callout-sage p-4 p-lg-5 reveal">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+          <p class="eyebrow mb-3"><span class="material-symbols-outlined ms-16">handshake</span> Come and See</p>
+          <h2 class="headline-md mb-3">Visit a church, or walk with us in the work</h2>
+        </div>
+        <div class="col-lg-4">
+          <div class="d-flex flex-column flex-sm-row flex-lg-column gap-2 justify-content-lg-end">
+            <a href="{% url 'website:contact' %}" class="btn btn-forest btn-lg-soft">Contact Us</a>
+            <a href="{% url 'website:contact' %}#support" class="btn btn-quiet btn-lg-soft">Support the Mission</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

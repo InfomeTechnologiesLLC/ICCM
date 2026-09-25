@@ -1,0 +1,16 @@
+{% extends "cms/base.html" %}
+{% block title %}Delete {{ title }}{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Delete this {{ title }}?</h1>
+<div class="stat-card" style="max-width:36rem;border-top:5px solid #b3261e;">
+  <p class="mb-2">You are about to permanently delete:</p>
+  <p class="fs-5 fw-semibold">{{ object }}</p>
+  <p class="text-muted small">This cannot be undone. If you only want to hide it from the website, go back and set
+    <strong>Visibility</strong> to <em>Draft</em> or untick <strong>Show on the website</strong> instead.</p>
+  <form method="post" class="d-flex gap-2">
+    {% csrf_token %}
+    <a href="javascript:history.back()" class="btn btn-dark">No, go back</a>
+    <button type="submit" class="btn btn-outline-danger">Yes, delete it</button>
+  </form>
+</div>
+{% endblock %}

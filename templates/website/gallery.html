@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Gallery — {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="shell" style="padding-block:2.5rem 3rem;">
+    <div class="row g-4 align-items-end">
+      <div class="col-lg-7">
+        <span class="chip mb-3"><span class="material-symbols-outlined ms-16">photo_library</span> Life Together</span>
+        <h1 class="headline-xl mb-3">Photo Gallery</h1>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if albums %}
+<section class="section-sm">
+  <div class="shell">
+    <div class="row g-3 g-lg-4">
+      {% for album in albums %}
+      <div class="col-sm-6 col-lg-3">
+        <a href="{{ album.get_absolute_url }}" class="card-warm card-lift d-block reveal">
+          <div class="card-media ratio-media photo-warm">
+            {% if album.cover_image %}<img src="{{ album.cover_image.url }}" alt="{{ album.title }}">{% endif %}
+          </div>
+          <div class="p-3"><h3 class="headline-sm mb-0">{{ album.title }}</h3></div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="shell">
+    <div class="d-flex flex-wrap gap-2 mb-4" data-filter-group="gallery">
+      <a href="?" class="chip chip-filter{% if active_filter == 'all' %} is-active{% endif %}">All</a>
+      {% for value, label in images.model.TAG_CHOICES %}
+      <a href="?filter={{ value }}" class="chip chip-filter{% if active_filter == value %} is-active{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+    <div class="gallery">
+      {% for img in images %}
+      <a href="{{ img.image.url }}" data-lightbox="{{ img.image.url }}" data-caption="{{ img.title }}"><img src="{{ img.image.url }}" alt="{{ img.title }}" loading="lazy"></a>
+      {% empty %}
+      <p class="text-muted-warm">No photos yet — check back soon.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark">
+      <button type="button" class="btn-close btn-close-white m-2 ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+      <img data-lightbox-img class="w-100" alt="">
+      <p data-lightbox-caption class="text-white text-center p-3 mb-0"></p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

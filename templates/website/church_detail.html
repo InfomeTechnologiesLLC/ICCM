@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ church.name }} — {{ site_settings.site_name }}{% endblock %}
+{% block meta_description %}{{ church.seo_description|default:church.short_description }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="shell" style="padding-block:2.5rem 3rem;">
+    <div class="row g-4 align-items-end">
+      <div class="col-lg-8">
+        <span class="chip mb-3"><span class="material-symbols-outlined ms-16">location_on</span> {{ church.get_region_display }}</span>
+        <h1 class="headline-xl mb-3">{{ church.name }}</h1>
+        <p class="body-lg text-muted-warm mb-0" style="max-width:34rem;">{{ church.short_description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="row g-4 g-xl-5">
+      <div class="col-lg-7">
+        <div class="card-media ratio-media photo-warm reveal mb-4" style="border-radius:var(--r-xl);">
+          {% if church.main_image %}<img src="{{ church.main_image.url }}" alt="{{ church.name }}">{% endif %}
+        </div>
+        <div class="body-md text-muted-warm">{{ church.description|safe }}</div>
+
+        {% if church.gallery.all %}
+        <div class="gallery mt-4">
+          {% for img in church.gallery.all %}
+          <a href="{{ img.image.url }}" data-lightbox="{{ img.image.url }}" data-caption="{{ img.caption }}"><img src="{{ img.image.url }}" alt="{{ img.caption }}"></a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card-warm p-4 p-xl-5 sticky-side">
+          <h3 class="headline-sm mb-3">Church Details</h3>
+          <ul class="list-unstyled body-sm text-muted-warm d-grid gap-3 mb-4">
+            <li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">schedule</span> {{ church.service_times }}</li>
+            {% if church.pastor %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">person</span> Pastor: {{ church.pastor }}</li>{% endif %}
+            {% if church.address %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">location_on</span> {{ church.address }}, {{ church.city }}</li>{% endif %}
+            {% if church.phone %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">call</span> <a href="tel:{{ church.phone }}">{{ church.phone }}</a></li>{% endif %}
+            {% if church.email %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">mail</span> <a href="mailto:{{ church.email }}">{{ church.email }}</a></li>{% endif %}
+            {% if church.established_date %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">history_edu</span> Established {{ church.established_date|date:"Y" }}</li>{% endif %}
+          </ul>
+          {% if church.google_maps_url %}
+          <a href="{{ church.google_maps_url }}" target="_blank" rel="noopener" class="btn btn-forest btn-lg-soft w-100 mb-2">Get Directions</a>
+          {% endif %}
+          <a href="{% url 'website:contact' %}" class="btn btn-quiet btn-lg-soft w-100">Contact This Church</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark">
+      <button type="button" class="btn-close btn-close-white m-2 ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+      <img data-lightbox-img class="w-100" alt="">
+      <p data-lightbox-caption class="text-white text-center p-3 mb-0"></p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

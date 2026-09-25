@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ school.name }} — {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="shell" style="padding-block:2.5rem 3rem;">
+    <div class="row g-4 align-items-end">
+      <div class="col-lg-8">
+        <span class="chip mb-3"><span class="material-symbols-outlined ms-16">school</span> Accredited by IATA &middot; Taught in English</span>
+        <h1 class="headline-xl mb-3">{{ school.name }}</h1>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="row g-4 g-xl-5 align-items-center">
+      <div class="col-lg-7">
+        <div class="card-media ratio-media reveal" style="border-radius:var(--r-xl);">
+          {% if school.campus_image %}<img src="{{ school.campus_image.url }}" alt="{{ school.name }} campus">
+          {% else %}<img src="{% static 'img/iccm/ictc.jpeg' %}" alt="India Christian Theological College">{% endif %}
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="body-md text-muted-warm">{{ school.description|safe }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if courses %}
+<section class="section bg-surface-low" id="courses">
+  <div class="shell">
+    <div class="text-center mb-5">
+      <p class="eyebrow eyebrow--muted justify-content-center mb-2">Programme</p>
+      <h2 class="headline-lg mb-3">Courses</h2>
+    </div>
+    <div class="row g-3 g-lg-4">
+      {% for course in courses %}
+      <div class="col-md-6 col-lg-3">
+        <article class="card-warm card-lift h-100 p-4 reveal">
+          <h3 class="headline-sm mb-2">{{ course.title }}</h3>
+          {% if course.duration %}<p class="body-sm text-outline mb-2">{{ course.duration }}</p>{% endif %}
+          <p class="body-sm text-muted-warm mb-0">{{ course.description }}</p>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if faculty %}
+<section class="section" id="faculty">
+  <div class="shell">
+    <div class="text-center mb-5"><h2 class="headline-lg mb-3">Faculty</h2></div>
+    <div class="row g-3 g-lg-4 justify-content-center">
+      {% for member in faculty %}
+      <div class="col-sm-6 col-lg-3">
+        <article class="card-warm card-lift h-100 d-flex flex-column text-center reveal">
+          <div class="card-media ratio-square photo-warm">
+            {% if member.photo %}<img src="{{ member.photo.url }}" alt="{{ member.name }}">{% endif %}
+          </div>
+          <div class="p-3">
+            <h3 class="headline-sm mb-1">{{ member.name }}</h3>
+            <p class="body-sm text-muted-warm mb-0">{{ member.role }}</p>
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section bg-surface-low" id="admissions">
+  <div class="shell">
+    <div class="row g-4 g-xl-5">
+      <div class="col-lg-6">
+        <h2 class="headline-lg mb-3">Admissions</h2>
+        <div class="body-md text-muted-warm mb-3">{{ school.admission_info|safe }}</div>
+      </div>
+      <div class="col-lg-6">
+        <h2 class="headline-lg mb-3">Requirements</h2>
+        <div class="body-md text-muted-warm mb-3">{{ school.requirements|safe }}</div>
+        {% if school.fees %}<p class="title-md mb-3" style="color:var(--primary-container);">{{ school.fees }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-sm" id="apply">
+  <div class="shell">
+    <div class="callout-forest p-4 p-lg-5 reveal">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <p class="eyebrow eyebrow--light mb-3">Apply</p>
+          <h2 class="headline-lg mb-3" style="color:var(--surface);">Ready to Train for Ministry?</h2>
+          <div class="body-md mb-0" style="color:rgba(242,240,237,.78);max-width:34rem;">{{ school.application_info|safe }}</div>
+        </div>
+        <div class="col-lg-5">
+          <div class="d-flex flex-column gap-2">
+            {% if school.registration_url %}
+            <a href="{{ school.registration_url }}" target="_blank" rel="noopener" class="btn btn-brass btn-lg-soft">Apply Now</a>
+            {% endif %}
+            <a href="{% url 'website:contact' %}" class="btn btn-ghost-light btn-lg-soft">Ask a Question</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ album.title }} — {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="shell" style="padding-block:2.5rem 3rem;">
+    <h1 class="headline-xl mb-2">{{ album.title }}</h1>
+    <p class="body-md text-muted-warm mb-0">{{ album.description }}</p>
+    <a href="{% url 'website:gallery' %}" class="link-arrow mt-3 d-inline-flex">
+      <span class="material-symbols-outlined">arrow_back</span> All albums
+    </a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="gallery">
+      {% for img in images %}
+      <a href="{{ img.image.url }}" data-lightbox="{{ img.image.url }}" data-caption="{{ img.title }}"><img src="{{ img.image.url }}" alt="{{ img.title }}" loading="lazy"></a>
+      {% empty %}
+      <p class="text-muted-warm">No photos in this album yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark">
+      <button type="button" class="btn-close btn-close-white m-2 ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+      <img data-lightbox-img class="w-100" alt="">
+      <p data-lightbox-caption class="text-white text-center p-3 mb-0"></p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,153 @@
+{% load static cms_extras %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}CMS{% endblock %} — ICCM Website Editor</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --side: 270px; --forest: #14261f; --brass: #c9a24a; --paper: #f4f1ec; }
+  html, body { height: auto; }
+  body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(--paper); color: #1f2a25; }
+
+  /* Sidebar: fixed to the screen height and scrolls on its own */
+  .cms-sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0; width: var(--side); height: 100vh;
+    background: var(--forest); color: #f2f0ed; overflow-y: auto; overscroll-behavior: contain;
+    z-index: 1040; padding-bottom: 2rem;
+  }
+  .cms-sidebar a { color: rgba(242,240,237,.8); text-decoration: none; display: flex; align-items: center;
+    gap: .6rem; padding: .55rem .9rem; border-radius: .5rem; font-size: .95rem; }
+  .cms-sidebar a:hover { background: rgba(255,255,255,.08); color: #fff; }
+  .cms-sidebar a.active { background: var(--brass); color: var(--forest); font-weight: 600; }
+  .cms-sidebar .ico { width: 1.25rem; text-align: center; opacity: .9; }
+  .cms-sidebar h6 { color: rgba(242,240,237,.5); font-size: .75rem; font-weight: 600; padding: 1rem .9rem .3rem; margin: 0; }
+  .brand-block { padding: 1.25rem 1.1rem 1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .brand-block strong { color: #fff; font-size: 1.05rem; display: block; }
+  .brand-block small { opacity: .7; }
+
+  .cms-main { margin-left: var(--side); min-height: 100vh; }
+  .cms-topbar { position: sticky; top: 0; z-index: 1030; background: rgba(244,241,236,.95);
+    backdrop-filter: blur(6px); border-bottom: 1px solid #e3ddd3; padding: .75rem 1.75rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .cms-content { padding: 1.75rem; max-width: 1200px; }
+
+  .stat-card { border-radius: 1rem; background: #fff; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .help-box { background: #fff; border-left: 5px solid var(--brass); border-radius: .75rem; padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .help-box p { margin: 0; }
+  .btn-dark { background: var(--forest); border-color: var(--forest); }
+  .menu-toggle { display: none; }
+  .sidebar-backdrop { display: none; }
+
+  @media (max-width: 991px) {
+    .cms-sidebar { transform: translateX(-100%); transition: transform .2s ease; }
+    .cms-sidebar.open { transform: none; }
+    .sidebar-backdrop.open { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 1035; }
+    .cms-main { margin-left: 0; }
+    .menu-toggle { display: inline-block; }
+    .cms-topbar, .cms-content { padding-left: 1rem; padding-right: 1rem; }
+  }
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+{% with current=request.resolver_match.url_name|section %}
+<aside class="cms-sidebar" id="cmsSidebar" aria-label="CMS menu">
+  <div class="brand-block">
+    <strong>ICCM Website Editor</strong>
+    <small>Logged in as {{ user.get_full_name|default:user.username }}</small>
+  </div>
+  <nav class="px-2">
+    <a href="{% url 'cms:dashboard' %}" class="{% if current == 'dashboard' %}active{% endif %}"><span class="ico">🏠</span> Start here</a>
+
+    <h6>Home page</h6>
+    <a href="{% url 'cms:hero' %}" class="{% if current == 'hero' %}active{% endif %}"><span class="ico">🖼️</span> Top banner</a>
+    <a href="{% url 'cms:home_about' %}" class="{% if current == 'home_about' %}active{% endif %}"><span class="ico">👋</span> Welcome / About box</a>
+    <a href="{% url 'cms:statistic_list' %}" class="{% if current == 'statistic' %}active{% endif %}"><span class="ico">🔢</span> Numbers strip</a>
+    <a href="{% url 'cms:cta' %}" class="{% if current == 'cta' %}active{% endif %}"><span class="ico">🤝</span> Support box</a>
+
+    <h6>About page</h6>
+    <a href="{% url 'cms:about_page' %}" class="{% if current == 'about_page' %}active{% endif %}"><span class="ico">📖</span> About text &amp; photos</a>
+    <a href="{% url 'cms:leader_list' %}" class="{% if current == 'leader' %}active{% endif %}"><span class="ico">👤</span> Leaders</a>
+    <a href="{% url 'cms:belief_list' %}" class="{% if current == 'belief' %}active{% endif %}"><span class="ico">✝️</span> What we believe</a>
+    <a href="{% url 'cms:timeline_list' %}" class="{% if current == 'timeline' %}active{% endif %}"><span class="ico">📅</span> Timeline</a>
+
+    <h6>Ministry &amp; churches</h6>
+    <a href="{% url 'cms:ministry_list' %}" class="{% if current == 'ministry' %}active{% endif %}"><span class="ico">🙏</span> Ministries</a>
+    <a href="{% url 'cms:church_list' %}" class="{% if current == 'church' %}active{% endif %}"><span class="ico">⛪</span> Churches</a>
+    <a href="{% url 'cms:event_list' %}" class="{% if current == 'event' %}active{% endif %}"><span class="ico">🗓️</span> Events</a>
+
+    <h6>ICTC (college)</h6>
+    <a href="{% url 'cms:bible_school' %}" class="{% if current == 'bible_school' %}active{% endif %}"><span class="ico">🎓</span> ICTC page</a>
+    <a href="{% url 'cms:course_list' %}" class="{% if current == 'course' %}active{% endif %}"><span class="ico">📚</span> Courses</a>
+    <a href="{% url 'cms:faculty_list' %}" class="{% if current == 'faculty' %}active{% endif %}"><span class="ico">🧑‍🏫</span> Teachers</a>
+
+    <h6>Photos</h6>
+    <a href="{% url 'cms:album_list' %}" class="{% if current == 'album' %}active{% endif %}"><span class="ico">🗂️</span> Photo albums</a>
+    <a href="{% url 'cms:image_list' %}" class="{% if current == 'image' %}active{% endif %}"><span class="ico">📷</span> All photos</a>
+
+    <h6>News</h6>
+    <a href="{% url 'cms:post_list' %}" class="{% if current == 'post' %}active{% endif %}"><span class="ico">📰</span> Blog posts</a>
+    <a href="{% url 'cms:category_list' %}" class="{% if current == 'category' %}active{% endif %}"><span class="ico">🏷️</span> Blog categories</a>
+
+    <h6>Messages</h6>
+    <a href="{% url 'cms:message_list' %}" class="{% if current == 'message' %}active{% endif %}"><span class="ico">✉️</span> Contact messages</a>
+
+    <h6>Settings</h6>
+    <a href="{% url 'cms:settings' %}" class="{% if current == 'settings' %}active{% endif %}"><span class="ico">⚙️</span> Logo, contact &amp; footer</a>
+    <a href="{% url 'cms:menuitem_list' %}" class="{% if current == 'menuitem' %}active{% endif %}"><span class="ico">☰</span> Top menu links</a>
+    {% if user.is_superuser %}<a href="{% url 'cms:user_list' %}" class="{% if current == 'user' %}active{% endif %}"><span class="ico">👥</span> Users</a>{% endif %}
+    <a href="/django-admin/"><span class="ico">🛠️</span> Advanced admin</a>
+    <a href="{% url 'cms:logout' %}"><span class="ico">🚪</span> Log out</a>
+  </nav>
+</aside>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+{% endwith %}
+{% endif %}
+
+<div class="{% if user.is_authenticated %}cms-main{% endif %}">
+  {% if user.is_authenticated %}
+  <div class="cms-topbar">
+    <button class="btn btn-outline-dark btn-sm menu-toggle" type="button" id="menuToggle" aria-controls="cmsSidebar" aria-expanded="false">☰ Menu</button>
+    <span class="text-muted small d-none d-md-inline">Changes appear on the website as soon as you click Save.</span>
+    <a href="{% url 'website:home' %}" target="_blank" rel="noopener" class="btn btn-sm btn-dark">View website ↗</a>
+  </div>
+  {% endif %}
+  <div class="{% if user.is_authenticated %}cms-content{% endif %}">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+  var btn = document.getElementById('menuToggle');
+  var side = document.getElementById('cmsSidebar');
+  var back = document.getElementById('sidebarBackdrop');
+  if (!btn || !side) return;
+  function set(open) {
+    side.classList.toggle('open', open);
+    back.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  btn.addEventListener('click', function () { set(!side.classList.contains('open')); });
+  back.addEventListener('click', function () { set(false); });
+  var active = side.querySelector('a.active');
+  if (active) side.scrollTop = active.offsetTop - side.clientHeight / 2;
+})();
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

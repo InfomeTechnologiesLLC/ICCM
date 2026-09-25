@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ site_settings.site_name }} — Kerala &amp; Punjab{% endblock %}
+{% block meta_description %}{{ site_settings.default_seo_description|default:site_settings.description }}{% endblock %}
+
+{% block content %}
+
+<!-- =============================== Hero ================================ -->
+<section class="hero hero-full">
+  <div class="hero-bg">
+    {% if hero.background_image %}
+      <img src="{{ hero.background_image.url }}" alt="">
+    {% else %}
+      <img src="{% static 'img/iccm/hero.jpeg' %}" alt="ICCM church members gathered together">
+    {% endif %}
+  </div>
+  <div class="shell">
+    <div class="row">
+      <div class="col-lg-9 col-xl-8">
+        <p class="hero-notice mb-4">
+          <span class="material-symbols-outlined ms-14">public</span>
+          {{ hero.subheading }}
+        </p>
+        <h1 class="headline-xl mb-3">{{ hero.heading|linebreaksbr }}</h1>
+        <p class="body-lg mb-4" style="max-width:34rem;">{{ hero.description }}</p>
+        <div class="d-flex flex-wrap gap-2 mb-5">
+          {% if hero.button_text %}
+          <a href="{{ hero.button_url }}" class="btn btn-brass btn-lg-soft">
+            <span class="material-symbols-outlined ms-18">location_on</span> {{ hero.button_text }}
+          </a>
+          {% endif %}
+          {% if hero.button2_text %}
+          <a href="{{ hero.button2_url }}" class="btn btn-ghost-light btn-lg-soft">
+            <span class="material-symbols-outlined ms-18">volunteer_activism</span> {{ hero.button2_text }}
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ Count strip ============================ -->
+{% if stats %}
+<section class="shell" style="margin-top:-2.5rem;position:relative;z-index:5;">
+  <div class="count-strip">
+    {% for s in stats %}
+    <div class="count-item"><b>{{ s.value }}</b><span>{{ s.label }}</span></div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ============================== Welcome ============================== -->
+<section class="section">
+  <div class="shell">
+    <div class="row g-4 g-xl-5 align-items-center">
+      <div class="col-lg-6">
+        <div class="card-media ratio-media photo-warm reveal" style="border-radius:var(--r-xl);">
+          {% if welcome.image %}<img src="{{ welcome.image.url }}" alt="The church family gathered together">
+          {% else %}<img src="{% static 'img/iccm/welcome.jpeg' %}" alt="The church family gathered together">{% endif %}
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <p class="eyebrow mb-2">Welcome</p>
+        <h2 class="headline-lg mb-3">{{ welcome.title }}</h2>
+        <div class="body-lg text-muted-warm mb-3">{{ welcome.description|safe }}</div>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{{ welcome.button_url|default:'/about/' }}" class="btn btn-forest">
+            {{ welcome.button_text|default:"Our story" }} <span class="material-symbols-outlined ms-18">arrow_forward</span>
+          </a>
+          <a href="{% url 'website:about' %}#beliefs" class="btn btn-quiet">What we believe</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== Purpose ============================== -->
+<section class="section bg-surface-low">
+  <div class="shell">
+    <div class="section-intro text-center mb-5">
+      <p class="eyebrow eyebrow--muted justify-content-center mb-2">Our Purpose</p>
+      <h2 class="headline-lg mb-3">Preach. Teach. Baptise.</h2>
+      <p class="body-md text-muted-warm mb-0">Three words from the Great Commission of Jesus shape everything ICCM does.</p>
+    </div>
+    <div class="row g-3 g-lg-4">
+      <div class="col-md-4">
+        <article class="card-warm card-lift h-100 p-4 p-xl-5 reveal">
+          <span class="pathway-icon mb-3"><span class="material-symbols-outlined ms-24">campaign</span></span>
+          <p class="eyebrow mb-2">One</p>
+          <h3 class="headline-sm mb-2">Preach the Gospel</h3>
+          <p class="body-sm text-muted-warm mb-3">Open-air preaching, Gospel conventions, home visits and personal evangelism across Punjab and Kerala.</p>
+          <a class="link-arrow" href="{% url 'website:ministry_list' %}">Our outreach <span class="material-symbols-outlined">arrow_forward</span></a>
+        </article>
+      </div>
+      <div class="col-md-4">
+        <article class="card-warm card-lift h-100 p-4 p-xl-5 reveal">
+          <span class="pathway-icon pathway-icon--brass mb-3"><span class="material-symbols-outlined ms-24">church</span></span>
+          <p class="eyebrow mb-2">Two</p>
+          <h3 class="headline-sm mb-2">Teach the Word</h3>
+          <p class="body-sm text-muted-warm mb-3">Bible study in our local churches, and theological training for young men and women at ICTC.</p>
+          <a class="link-arrow" href="{% url 'website:bible_school' %}">About ICTC <span class="material-symbols-outlined">arrow_forward</span></a>
+        </article>
+      </div>
+      <div class="col-md-4">
+        <article class="card-warm card-lift h-100 p-4 p-xl-5 reveal">
+          <span class="pathway-icon pathway-icon--forest mb-3"><span class="material-symbols-outlined ms-24">water_drop</span></span>
+          <p class="eyebrow mb-2">Three</p>
+          <h3 class="headline-sm mb-2">Baptise Believers</h3>
+          <p class="body-sm text-muted-warm mb-3">Making disciples and baptizing them in the name of the Father, the Son and the Holy Spirit.</p>
+          <a class="link-arrow" href="{% url 'website:about' %}#beliefs">What we believe <span class="material-symbols-outlined">arrow_forward</span></a>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================== Ministries ================================ -->
+{% if ministries %}
+<section class="section">
+  <div class="shell">
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+      <div class="section-intro">
+        <p class="eyebrow mb-2">The Work</p>
+        <h2 class="headline-lg mb-2">Our Ministries</h2>
+        <p class="body-md text-muted-warm mb-0">Works that carry the gospel into homes, schools, villages and the next generation.</p>
+      </div>
+      <a class="link-arrow" href="{% url 'website:ministry_list' %}">All ministries <span class="material-symbols-outlined">arrow_forward</span></a>
+    </div>
+    <div class="mosaic">
+      {% for ministry in ministries %}
+      <a class="tile{% if forloop.first %} tile--lg{% endif %} reveal" href="{{ ministry.get_absolute_url }}">
+        {% if ministry.image %}<img src="{{ ministry.image.url }}" alt="{{ ministry.name }}">{% endif %}
+        <span class="tile-caption">
+          <span class="headline-sm d-block">{{ ministry.name }}</span>
+          {% if forloop.first %}<p class="body-sm d-none d-sm-block">{{ ministry.short_description }}</p>{% endif %}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ============================ Verse band ============================= -->
+<section class="band">
+  <img src="{% static 'img/iccm/band-verse.jpeg' %}" alt="">
+  <div class="shell" style="padding-block:4rem;">
+    <div class="row">
+      <div class="col-lg-7">
+        <p class="eyebrow eyebrow--light mb-3">Our Commission</p>
+        <p class="font-serif fst-italic mb-4" style="font-size:clamp(1.375rem,1rem+1.6vw,2rem);line-height:1.5;color:#fff;">
+          &ldquo;Therefore go and make disciples of all nations, baptizing them in the name of the Father and of the Son and of the Holy Spirit.&rdquo;
+        </p>
+        <p class="label-md mb-0" style="color:var(--secondary-fixed-dim);">Matthew 28:19</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== Where we serve ========================== -->
+<section class="section">
+  <div class="shell">
+    <div class="section-intro text-center mb-4">
+      <p class="eyebrow eyebrow--muted justify-content-center mb-2">Where We Serve</p>
+      <h2 class="headline-lg mb-3">Two States, One Mission</h2>
+    </div>
+    <div class="row g-3 g-lg-4">
+      <div class="col-md-6">
+        <a class="region-card reveal" href="{% url 'website:about' %}#story">
+          <img src="{% static 'img/iccm/region-kerala.jpeg' %}" alt="ICCM church members in Kerala">
+          <span class="region-body">
+            <span class="chip chip-brass mb-3">South India</span>
+            <h3 class="headline-lg mb-2">Kerala</h3>
+            <p class="body-md mb-3">{% if kerala_church %}{{ kerala_church.short_description }}{% else %}Where ICCM ministry began in 1996.{% endif %}</p>
+            <span class="link-arrow" style="color:var(--secondary-fixed-dim);">Our story <span class="material-symbols-outlined">arrow_forward</span></span>
+          </span>
+        </a>
+      </div>
+      <div class="col-md-6">
+        <a class="region-card reveal" href="{% url 'website:about' %}#story">
+          <img src="{% static 'img/iccm/region-punjab.jpeg' %}" alt="Church members at a church in Faridkot, Punjab">
+          <span class="region-body">
+            <span class="chip chip-brass mb-3">North India</span>
+            <h3 class="headline-lg mb-2">Punjab</h3>
+            <p class="body-md mb-3">{% if punjab_church %}{{ punjab_church.short_description }}{% else %}Establishing churches where there is no Church of Christ yet.{% endif %}</p>
+            <span class="link-arrow" style="color:var(--secondary-fixed-dim);">See the work <span class="material-symbols-outlined">arrow_forward</span></span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ Bible school =========================== -->
+<section class="section bg-surface-low">
+  <div class="shell">
+    <div class="row g-4 g-xl-5 align-items-center">
+      <div class="col-lg-7">
+        <div class="card-media ratio-media reveal" style="border-radius:var(--r-xl);">
+          {% if bible_school.campus_image %}<img src="{{ bible_school.campus_image.url }}" alt="The mission Bible school">
+          {% else %}<img src="{% static 'img/iccm/ictc.jpeg' %}" alt="India Christian Theological College">{% endif %}
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <p class="eyebrow mb-2">Training Preachers Since 2000</p>
+        <h2 class="headline-lg mb-3">{{ bible_school.name }}</h2>
+        <div class="body-md text-muted-warm mb-4">{{ bible_school.description|safe|truncatewords_html:60 }}</div>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{% url 'website:bible_school' %}" class="btn btn-forest btn-lg-soft">About ICTC <span class="material-symbols-outlined ms-18">arrow_forward</span></a>
+          <a href="{% url 'website:contact' %}#support" class="btn btn-quiet btn-lg-soft">Sponsor a student</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== Upcoming events ========================= -->
+<section class="section">
+  <div class="shell">
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+      <div class="section-intro">
+        <p class="eyebrow eyebrow--muted mb-2">What&rsquo;s Coming</p>
+        <h2 class="headline-lg mb-2">Upcoming Gatherings</h2>
+      </div>
+      <a class="link-arrow" href="{% url 'website:event_list' %}">All events <span class="material-symbols-outlined">arrow_forward</span></a>
+    </div>
+    <div class="row g-3 g-lg-4">
+      {% for event in upcoming_events %}
+      <div class="col-md-4">
+        <article class="card-warm card-lift h-100 d-flex flex-column reveal">
+          <div class="card-media ratio-media photo-warm">
+            {% if event.featured_image %}<img src="{{ event.featured_image.url }}" alt="{{ event.name }}">{% endif %}
+          </div>
+          <div class="p-3 p-xl-4 d-flex flex-column flex-grow-1">
+            <p class="eyebrow mb-2">{{ event.start_date|date:"d M Y" }}</p>
+            <h3 class="headline-sm mb-2">{{ event.name }}</h3>
+            <p class="body-sm text-muted-warm flex-grow-1">{{ event.short_description }}</p>
+            <a class="link-arrow mt-3" href="{{ event.get_absolute_url }}">Details <span class="material-symbols-outlined">arrow_forward</span></a>
+          </div>
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12"><p class="text-muted-warm">No upcoming events at the moment — check back soon.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================ From the blog ========================== -->
+<section class="section bg-surface-low">
+  <div class="shell">
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+      <div class="section-intro">
+        <p class="eyebrow eyebrow--muted mb-2">News &amp; Field Reports</p>
+        <h2 class="headline-lg mb-2">From the Mission</h2>
+      </div>
+      <a class="link-arrow" href="{% url 'website:blog_list' %}">Read the blog <span class="material-symbols-outlined">arrow_forward</span></a>
+    </div>
+    <div class="row g-3 g-lg-4">
+      {% for post in latest_posts %}
+      <div class="col-md-4">
+        <article class="card-warm card-lift h-100 d-flex flex-column reveal">
+          <a class="card-media ratio-media photo-warm d-block" href="{{ post.get_absolute_url }}">
+            {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}">{% endif %}
+          </a>
+          <div class="p-3 p-xl-4 d-flex flex-column flex-grow-1">
+            {% if post.category %}<span class="tag mb-3">{{ post.category.name }}</span>{% endif %}
+            <h3 class="headline-sm mb-2"><a href="{{ post.get_absolute_url }}" class="text-decoration-none" style="color:inherit;">{{ post.title }}</a></h3>
+            <p class="body-sm text-muted-warm flex-grow-1">{{ post.excerpt }}</p>
+            <p class="post-meta mt-3 mb-0">
+              <span>{{ post.display_author }}</span><span class="sep">&bull;</span><span>{{ post.published_at|date:"d M Y" }}</span>
+            </p>
+          </div>
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12"><p class="text-muted-warm">No articles available yet.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================== Gallery ============================== -->
+{% if gallery_images %}
+<section class="section">
+  <div class="shell">
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+      <div class="section-intro">
+        <p class="eyebrow eyebrow--muted mb-2">From Punjab &amp; Kerala</p>
+        <h2 class="headline-lg mb-2">Life Together</h2>
+      </div>
+      <a class="link-arrow" href="{% url 'website:gallery' %}">Full gallery <span class="material-symbols-outlined">arrow_forward</span></a>
+    </div>
+    <div class="gallery reveal">
+      {% for img in gallery_images %}
+      <a href="{% url 'website:gallery' %}"><img src="{{ img.image.url }}" alt="{{ img.title }}"></a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ============================ Support CTA ============================ -->
+{% if cta %}
+<section class="section-sm">
+  <div class="shell">
+    <div class="callout-forest p-4 p-lg-5 reveal">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <p class="eyebrow eyebrow--light mb-3"><span class="material-symbols-outlined ms-16">volunteer_activism</span> {{ cta.eyebrow }}</p>
+          <h2 class="headline-lg mb-3" style="color:var(--surface);">{{ cta.heading }}</h2>
+          <p class="body-md mb-0" style="color:rgba(242,240,237,.78);max-width:34rem;">{{ cta.description }}</p>
+        </div>
+        <div class="col-lg-5">
+          <div class="d-flex flex-column flex-sm-row flex-lg-column gap-2 justify-content-lg-end">
+            <a href="{{ cta.button_url }}" class="btn btn-brass btn-lg-soft"><span class="material-symbols-outlined ms-20">favorite</span> {{ cta.button_text }}</a>
+            <a href="{% url 'website:contact' %}" class="btn btn-ghost-light btn-lg-soft"><span class="material-symbols-outlined ms-20">mail</span> Contact Us</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

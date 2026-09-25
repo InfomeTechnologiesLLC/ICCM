@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" role="img" aria-label="Grace and Truth Community Church">
+  <circle cx="20" cy="20" r="20" fill="#1e3a2f"/>
+  <path d="M20 7.5v25" stroke="#fbf9f6" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M11.5 15.6h17" stroke="#fbf9f6" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M11.6 16.4C11.9 24 14.9 29.6 19.6 32.6" fill="none" stroke="#f0bd8b" stroke-width="1.35" stroke-linecap="round" stroke-dasharray="1.5 2.7"/>
+  <path d="M28.4 16.4C28.1 24 25.1 29.6 20.4 32.6" fill="none" stroke="#f0bd8b" stroke-width="1.35" stroke-linecap="round" stroke-dasharray="1.5 2.7"/>
+</svg>

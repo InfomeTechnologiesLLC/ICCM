@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Our Churches — {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="shell" style="padding-block:2.5rem 3rem;">
+    <div class="row g-4 align-items-end">
+      <div class="col-lg-7">
+        <span class="chip mb-3"><span class="material-symbols-outlined ms-16">location_on</span> Kerala &amp; Punjab</span>
+        <h1 class="headline-xl mb-3">Our Churches</h1>
+        <p class="body-lg text-muted-warm mb-0" style="max-width:34rem;">
+          Congregations across Kerala and a growing work in Punjab. Every one of them is open to
+          you &mdash; come as you are.
+        </p>
+      </div>
+      <div class="col-lg-5">
+        <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+          <a href="#kerala" class="chip chip-filter">Kerala</a>
+          <a href="#punjab" class="chip chip-filter">Punjab</a>
+          <a href="#visit" class="chip chip-filter">Planning a visit</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-sm" id="kerala">
+  <div class="shell">
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+      <div>
+        <p class="eyebrow mb-2">South India</p>
+        <h2 class="headline-lg">Kerala Churches</h2>
+      </div>
+    </div>
+    <div class="row g-3 g-lg-4">
+      {% for church in kerala_churches %}
+      <div class="col-md-6 col-lg-4">
+        <article class="card-warm card-lift h-100 d-flex flex-column reveal">
+          <div class="card-media ratio-media photo-warm">
+            {% if church.main_image %}<img src="{{ church.main_image.url }}" alt="{{ church.name }}">{% endif %}
+          </div>
+          <div class="p-3 p-xl-4 d-flex flex-column flex-grow-1">
+            <h3 class="headline-sm mb-1">{{ church.name }}</h3>
+            <p class="body-sm text-outline mb-3">{{ church.city }}{% if church.state %}, {{ church.state }}{% endif %}</p>
+            <ul class="list-unstyled body-sm text-muted-warm d-grid gap-2 mb-3 flex-grow-1">
+              <li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">schedule</span> {{ church.service_times }}</li>
+              {% if church.pastor %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">person</span> Pastor: {{ church.pastor }}</li>{% endif %}
+            </ul>
+            <a class="link-arrow" href="{{ church.get_absolute_url }}">Learn more <span class="material-symbols-outlined">arrow_forward</span></a>
+          </div>
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12"><p class="text-muted-warm">Kerala churches will appear here once added in the CMS.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section-sm bg-surface-low" id="punjab">
+  <div class="shell">
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+      <div>
+        <p class="eyebrow mb-2">North India</p>
+        <h2 class="headline-lg">The Work in Punjab</h2>
+      </div>
+    </div>
+    <div class="row g-3 g-lg-4">
+      {% for church in punjab_churches %}
+      <div class="col-md-6 col-lg-4">
+        <article class="card-warm card-lift h-100 d-flex flex-column reveal">
+          <div class="card-media ratio-media photo-warm">
+            {% if church.main_image %}<img src="{{ church.main_image.url }}" alt="{{ church.name }}">{% endif %}
+          </div>
+          <div class="p-3 p-xl-4 d-flex flex-column flex-grow-1">
+            <h3 class="headline-sm mb-1">{{ church.name }}</h3>
+            <p class="body-sm text-outline mb-3">{{ church.city }}{% if church.state %}, {{ church.state }}{% endif %}</p>
+            <p class="body-sm text-muted-warm flex-grow-1">{{ church.short_description }}</p>
+            <a class="link-arrow" href="{{ church.get_absolute_url }}">Learn more <span class="material-symbols-outlined">arrow_forward</span></a>
+          </div>
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12"><p class="text-muted-warm">Punjab churches will appear here once added in the CMS.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section-sm" id="visit">
+  <div class="shell">
+    <div class="callout-sage p-4 p-lg-5 reveal">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+          <p class="eyebrow mb-3"><span class="material-symbols-outlined ms-16">directions</span> Planning a Visit</p>
+          <h2 class="headline-md mb-3">You are welcome at any of our churches</h2>
+          <p class="body-sm text-muted-warm mb-0" style="max-width:38rem;">
+            There is no need to tell us you are coming, though we are always glad when you do.
+            Reach out on the contact page and we will help you find the nearest congregation.
+          </p>
+        </div>
+        <div class="col-lg-4">
+          <a href="{% url 'website:contact' %}" class="btn btn-forest btn-lg-soft">Get in touch</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

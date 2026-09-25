@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Ministries — {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="shell" style="padding-block:2.5rem 3rem;">
+    <div class="row g-4 align-items-end">
+      <div class="col-lg-8">
+        <span class="chip mb-3"><span class="material-symbols-outlined ms-16">diversity_3</span> The Work</span>
+        <h1 class="headline-xl mb-3">Our Ministries</h1>
+        <p class="body-lg text-muted-warm mb-0" style="max-width:34rem;">
+          Works that carry the gospel into homes, schools, villages and the next generation.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="row g-3 g-lg-4">
+      {% for ministry in ministries %}
+      <div class="col-md-6 col-lg-4">
+        <article class="card-warm card-lift h-100 d-flex flex-column reveal" id="{{ ministry.slug }}">
+          <div class="card-media ratio-media photo-warm">
+            {% if ministry.image %}<img src="{{ ministry.image.url }}" alt="{{ ministry.name }}">{% endif %}
+          </div>
+          <div class="p-3 p-xl-4 d-flex flex-column flex-grow-1">
+            <span class="pathway-icon mb-3"><span class="material-symbols-outlined ms-24">{{ ministry.icon|default:"church" }}</span></span>
+            <h3 class="headline-sm mb-2">{{ ministry.name }}</h3>
+            <p class="body-sm text-muted-warm flex-grow-1">{{ ministry.short_description }}</p>
+            <a class="link-arrow mt-3" href="{{ ministry.get_absolute_url }}">Learn more <span class="material-symbols-outlined">arrow_forward</span></a>
+          </div>
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12"><p class="text-muted-warm">Ministries will appear here once added in the CMS.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

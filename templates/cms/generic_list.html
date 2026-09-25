@@ -1,0 +1,89 @@
+{% extends "cms/base.html" %}
+{% load cms_extras %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .list-thumb { width: 64px; height: 48px; object-fit: cover; border-radius: .4rem; background: #eee8de; display: block; }
+  .list-thumb.empty { display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 1.1rem; }
+  .table td, .table th { vertical-align: middle; }
+  .row-title { font-weight: 600; color: inherit; text-decoration: none; }
+  .row-title:hover { text-decoration: underline; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% section_help as help %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+  <h1 class="h3 mb-0">{{ title }}</h1>
+  <div class="d-flex gap-2">
+    {% if help.url %}<a href="{{ help.url }}" target="_blank" rel="noopener" class="btn btn-outline-secondary">See on website ↗</a>{% endif %}
+    {% if add_url_name %}<a href="{% url add_url_name %}" class="btn btn-dark">+ Add new</a>{% endif %}
+  </div>
+</div>
+
+{% if help.what %}
+<div class="help-box">
+  <p><strong>What is this?</strong> {{ help.what }}</p>
+  {% if help.where %}<p class="mt-1"><strong>Where it shows:</strong> {{ help.where }}</p>{% endif %}
+  {% if edit_url_name %}<p class="mt-1 small text-muted">Click a name to edit it.</p>{% endif %}
+</div>
+{% endif %}
+
+<div class="stat-card p-0 overflow-auto">
+  <table class="table table-hover mb-0">
+    <thead class="table-light">
+      <tr>
+        <th style="width:80px;">Photo</th>
+        {% for label, attr in columns %}<th>{{ label }}</th>{% endfor %}
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for obj in object_list %}
+      <tr>
+        <td>
+          {% with t=obj|thumb %}
+          {% if t %}<img src="{{ t }}" alt="" class="list-thumb" loading="lazy">{% else %}<span class="list-thumb empty">—</span>{% endif %}
+          {% endwith %}
+        </td>
+        {% for label, attr in columns %}
+        <td>
+          {% with v=obj|attr:attr %}
+          {% if forloop.first and edit_url_name %}
+            <a class="row-title" href="{% url edit_url_name obj.pk %}">{{ v|default:"(no name)" }}</a>
+          {% elif v is True %}<span class="badge bg-success">Yes</span>
+          {% elif v is False %}<span class="badge bg-light text-secondary border">No</span>
+          {% elif v == "published" %}<span class="badge bg-success">Published (visible)</span>
+          {% elif v == "draft" %}<span class="badge bg-warning text-dark">Draft (hidden)</span>
+          {% elif v == "archived" %}<span class="badge bg-secondary">Archived (hidden)</span>
+          {% elif v == "unread" %}<span class="badge bg-danger">Unread</span>
+          {% else %}{{ v|default:"—" }}{% endif %}
+          {% endwith %}
+        </td>
+        {% endfor %}
+        <td class="text-end text-nowrap">
+          {% if edit_url_name %}<a href="{% url edit_url_name obj.pk %}" class="btn btn-sm btn-dark">Edit</a>{% endif %}
+          {% if delete_url_name %}<a href="{% url delete_url_name obj.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="{{ columns|length|add:2 }}" class="text-center py-5">
+        <p class="mb-2 text-muted">Nothing here yet.</p>
+        {% if add_url_name %}<a href="{% url add_url_name %}" class="btn btn-dark">+ Add the first one</a>{% endif %}
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if is_paginated %}
+<nav class="mt-3">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">← Previous</a></li>{% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next →</a></li>{% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "cms/base.html" %}
+{% load cms_extras %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_head %}
+{{ form.media }}
+<style>
+  .form-card { max-width: 52rem; }
+  .field-block { padding: 1rem 0; border-bottom: 1px solid #eee8de; }
+  .field-block:last-child { border-bottom: 0; }
+  .field-block .form-label { font-weight: 600; margin-bottom: .35rem; }
+  .field-block .form-text { color: #6b746f; }
+  .req { color: #b3261e; font-weight: 700; }
+  .img-preview { display: block; max-width: 280px; max-height: 180px; object-fit: cover;
+    border-radius: .6rem; border: 1px solid #e3ddd3; margin: .5rem 0; background: #f7f5f1; }
+  .file-current { font-size: .9rem; color: #555; }
+  .save-bar { position: sticky; bottom: 0; background: rgba(255,255,255,.97); border-top: 1px solid #e3ddd3;
+    padding: .9rem 1.25rem; margin: 1rem -1.25rem -1.25rem; border-radius: 0 0 1rem 1rem;
+    display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; z-index: 5; }
+  details.seo summary { cursor: pointer; font-weight: 600; padding: .75rem 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% section_help as help %}
+<h1 class="h3 mb-3">{{ title }}</h1>
+
+{% if help.what %}
+<div class="help-box form-card">
+  <p><strong>What is this?</strong> {{ help.what }}</p>
+  {% if help.where %}<p class="mt-1"><strong>Where it shows:</strong> {{ help.where }}
+    {% if help.url %}<a href="{{ help.url }}" target="_blank" rel="noopener">Open that page ↗</a>{% endif %}</p>{% endif %}
+</div>
+{% endif %}
+
+<div class="stat-card form-card">
+  <p class="small text-muted mb-1">Fields marked <span class="req">*</span> must be filled in. Everything else is optional.</p>
+
+  {% if form.errors %}
+  <div class="alert alert-danger mt-2">Some fields need your attention. Look for the red messages below.</div>
+  {% endif %}
+  {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+  <form method="post" enctype="multipart/form-data" id="cmsForm" novalidate>
+    {% csrf_token %}
+
+    {% for field in form %}{% if not field|is_seo %}
+      {% if field.is_hidden %}{{ field }}{% else %}
+      <div class="field-block">
+        {% if field.widget_type == "checkbox" %}
+          <div class="form-check form-switch">
+            {{ field }}
+            <label class="form-check-label fw-semibold" for="{{ field.id_for_label }}">{{ field|nice_label }}</label>
+          </div>
+        {% else %}
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field|nice_label }}{% if field.field.required %} <span class="req">*</span>{% endif %}</label>
+          {% if field.widget_type == "clearablefile" or field.widget_type == "file" %}
+            <div class="file-field">{{ field }}</div>
+          {% else %}
+            {{ field }}
+          {% endif %}
+        {% endif %}
+        {% with h=field|nice_help %}{% if h %}<div class="form-text">{{ h }}</div>{% endif %}{% endwith %}
+        {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+      </div>
+      {% endif %}
+    {% endif %}{% endfor %}
+
+    <details class="seo" id="seoBlock">
+      <summary>Google search settings (optional)</summary>
+      <p class="small text-muted">Only change these if you want a different title or description when this page appears in Google. You can leave them empty.</p>
+      {% for field in form %}{% if field|is_seo %}
+      <div class="field-block">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {% if field.widget_type == "clearablefile" or field.widget_type == "file" %}<div class="file-field">{{ field }}</div>{% else %}{{ field }}{% endif %}
+        {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+      </div>
+      {% endif %}{% endfor %}
+    </details>
+
+    <div class="save-bar">
+      <button type="submit" class="btn btn-dark px-4">Save changes</button>
+      <a href="javascript:history.back()" class="btn btn-outline-secondary">Cancel</a>
+      {% if help.url %}<a href="{{ help.url }}" target="_blank" rel="noopener" class="btn btn-link ms-auto">See it on the website ↗</a>{% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  var form = document.getElementById('cmsForm');
+  if (!form) return;
+
+  // Hide the Google section if this form has no such fields
+  var seo = document.getElementById('seoBlock');
+  if (seo && !seo.querySelector('.field-block')) seo.remove();
+
+  // Show the current photo and a preview of a newly chosen one
+  form.querySelectorAll('.file-field').forEach(function (box) {
+    var link = box.querySelector('a[href]');
+    var input = box.querySelector('input[type=file]');
+    var clear = box.querySelector('input[type=checkbox]');
+    var img = document.createElement('img');
+    img.className = 'img-preview';
+    img.alt = 'Current photo';
+    if (link && /\.(jpe?g|png|gif|webp|svg)$/i.test(link.getAttribute('href'))) {
+      img.src = link.getAttribute('href');
+      box.insertBefore(img, box.firstChild);
+    }
+    // Make the wording clearer
+    box.childNodes.forEach(function (n) {
+      if (n.nodeType === 3) {
+        n.textContent = n.textContent.replace('Currently:', 'Current file:').replace('Change:', 'Replace with a new photo:');
+      }
+    });
+    if (clear) {
+      var lab = box.querySelector('label[for="' + clear.id + '"]');
+      if (lab) lab.textContent = ' Remove this photo';
+    }
+    if (input) {
+      input.addEventListener('change', function () {
+        var f = input.files && input.files[0];
+        if (!f || !f.type.startsWith('image/')) return;
+        img.src = URL.createObjectURL(f);
+        img.alt = 'New photo preview';
+        if (!img.parentNode) box.insertBefore(img, box.firstChild);
+      });
+    }
+  });
+
+  // Warn before leaving with unsaved changes
+  var dirty = false;
+  form.addEventListener('input', function () { dirty = true; });
+  form.addEventListener('change', function () { dirty = true; });
+  form.addEventListener('submit', function () { dirty = false; });
+  window.addEventListener('beforeunload', function (e) {
+    if (dirty) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  // Jump to the first error
+  var err = form.querySelector('.text-danger');
+  if (err) err.closest('.field-block').scrollIntoView({ block: 'center' });
+})();
+</script>
+{% endblock %}

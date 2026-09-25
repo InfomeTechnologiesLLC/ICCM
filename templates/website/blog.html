@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Blog — {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="shell" style="padding-block:2.5rem 3rem;">
+    <div class="row g-4 align-items-end">
+      <div class="col-lg-7">
+        <span class="chip mb-3"><span class="material-symbols-outlined ms-16">article</span> News &amp; Field Reports</span>
+        <h1 class="headline-xl mb-3">From the Mission</h1>
+      </div>
+      <div class="col-lg-5">
+        <form method="get" class="d-flex gap-2">
+          {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+          <input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search articles">
+          <button class="btn btn-quiet" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if featured_post %}
+<section class="section-sm">
+  <div class="shell">
+    <a href="{{ featured_post.get_absolute_url }}" class="card-warm card-lift d-block reveal">
+      <div class="row g-0">
+        <div class="col-md-6">
+          <div class="card-media ratio-media photo-warm h-100">
+            {% if featured_post.featured_image %}<img src="{{ featured_post.featured_image.url }}" alt="{{ featured_post.title }}">{% endif %}
+          </div>
+        </div>
+        <div class="col-md-6 p-4 p-xl-5 d-flex flex-column justify-content-center">
+          <span class="chip chip-brass mb-3" style="width:fit-content;">Featured</span>
+          <h2 class="headline-lg mb-2">{{ featured_post.title }}</h2>
+          <p class="body-md text-muted-warm mb-0">{{ featured_post.excerpt }}</p>
+        </div>
+      </div>
+    </a>
+  </div>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="shell">
+    <div class="row g-4 g-xl-5">
+      <div class="col-lg-8">
+        <div class="row g-3 g-lg-4">
+          {% for post in page_obj %}
+          <div class="col-md-6">
+            <article class="card-warm card-lift h-100 d-flex flex-column reveal">
+              <a class="card-media ratio-media photo-warm d-block" href="{{ post.get_absolute_url }}">
+                {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}">{% endif %}
+              </a>
+              <div class="p-3 p-xl-4 d-flex flex-column flex-grow-1">
+                {% if post.category %}<span class="tag mb-3">{{ post.category.name }}</span>{% endif %}
+                <h3 class="headline-sm mb-2"><a href="{{ post.get_absolute_url }}" class="text-decoration-none" style="color:inherit;">{{ post.title }}</a></h3>
+                <p class="body-sm text-muted-warm flex-grow-1">{{ post.excerpt }}</p>
+                <p class="post-meta mt-3 mb-0"><span>{{ post.display_author }}</span><span class="sep">&bull;</span><span>{{ post.published_at|date:"d M Y" }}</span></p>
+              </div>
+            </article>
+          </div>
+          {% empty %}
+          <div class="col-12"><p class="text-muted-warm">No articles available yet.</p></div>
+          {% endfor %}
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="mt-5" aria-label="Blog pagination">
+          <ul class="pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if active_category %}&category={{ active_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}">Previous</a></li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item{% if num == page_obj.number %} active{% endif %}"><a class="page-link" href="?page={{ num }}{% if active_category %}&category={{ active_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}">{{ num }}</a></li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if active_category %}&category={{ active_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}">Next</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card-warm p-4 sticky-side">
+          <h3 class="headline-sm mb-3">Categories</h3>
+          <ul class="list-unstyled body-sm d-grid gap-2">
+            <li><a class="link-arrow" href="{% url 'website:blog_list' %}">All Articles</a></li>
+            {% for cat in categories %}
+            <li><a class="link-arrow" href="?category={{ cat.slug }}">{{ cat.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

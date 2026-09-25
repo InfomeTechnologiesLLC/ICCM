@@ -1,0 +1,81 @@
+{% extends "cms/base.html" %}
+{% block title %}Start here{% endblock %}
+
+{% block extra_head %}
+<style>
+  .task { display: flex; gap: .9rem; align-items: flex-start; height: 100%; padding: 1.1rem 1.2rem;
+    background: #fff; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    text-decoration: none; color: inherit; border: 2px solid transparent; }
+  .task:hover { border-color: #c9a24a; }
+  .task .ico { font-size: 1.6rem; line-height: 1; }
+  .task strong { display: block; margin-bottom: .15rem; }
+  .task span.small { color: #6b746f; }
+  .count { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-1">Welcome, {{ user.get_full_name|default:user.username }}</h1>
+<p class="text-muted mb-4">This is where you update the ICCM website. Choose what you want to do below. You can't break anything: every screen has a <strong>Save changes</strong> button, and nothing changes until you click it.</p>
+
+{% if unread_messages %}
+<div class="alert alert-warning d-flex justify-content-between align-items-center">
+  <span>✉️ You have <strong>{{ unread_messages }}</strong> unread message{{ unread_messages|pluralize }} from the website.</span>
+  <a href="{% url 'cms:message_list' %}" class="btn btn-sm btn-dark">Read messages</a>
+</div>
+{% endif %}
+
+<h2 class="h5 mb-3">What would you like to do?</h2>
+<div class="row g-3 mb-5">
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:hero' %}"><span class="ico">🖼️</span><span><strong>Change the home page banner</strong><span class="small">The big photo and heading visitors see first.</span></span></a></div>
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:about_page' %}"><span class="ico">📖</span><span><strong>Edit the About us text</strong><span class="small">The story of the mission and its photos.</span></span></a></div>
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:ministry_list' %}"><span class="ico">🙏</span><span><strong>Update a ministry</strong><span class="small">Fellowship meetings, camps, VBS, ladies' meetings and more.</span></span></a></div>
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:event_add' %}"><span class="ico">🗓️</span><span><strong>Add an event</strong><span class="small">A meeting, camp or convention with its date and place.</span></span></a></div>
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:image_add' %}"><span class="ico">📷</span><span><strong>Upload a photo</strong><span class="small">Add a picture to one of the gallery albums.</span></span></a></div>
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:post_add' %}"><span class="ico">📰</span><span><strong>Write a news post</strong><span class="small">Share a report or story on the Blog page.</span></span></a></div>
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:bible_school' %}"><span class="ico">🎓</span><span><strong>Update the ICTC page</strong><span class="small">College text, photos, admissions and courses.</span></span></a></div>
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:settings' %}"><span class="ico">⚙️</span><span><strong>Change contact details</strong><span class="small">Email, phone, address, logo and footer.</span></span></a></div>
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:message_list' %}"><span class="ico">✉️</span><span><strong>Read contact messages</strong><span class="small">Messages visitors sent through the website.</span></span></a></div>
+</div>
+
+<h2 class="h5 mb-3">Your website at a glance</h2>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3"><a class="task d-block" href="{% url 'cms:ministry_list' %}"><div class="text-muted small">Ministries</div><div class="count">{{ total_ministries }}</div></a></div>
+  <div class="col-6 col-lg-3"><a class="task d-block" href="{% url 'cms:event_list' %}"><div class="text-muted small">Events</div><div class="count">{{ total_events }}</div><div class="small text-success">{{ upcoming_events }} upcoming</div></a></div>
+  <div class="col-6 col-lg-3"><a class="task d-block" href="{% url 'cms:post_list' %}"><div class="text-muted small">Blog posts</div><div class="count">{{ total_posts }}</div><div class="small text-success">{{ published_posts }} visible</div></a></div>
+  <div class="col-6 col-lg-3"><a class="task d-block" href="{% url 'cms:image_list' %}"><div class="text-muted small">Photos</div><div class="count">{{ gallery_images }}</div></a></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="stat-card h-100">
+      <h2 class="h6 mb-3">Latest messages</h2>
+      <ul class="list-unstyled mb-0">
+        {% for msg in recent_messages %}
+        <li class="d-flex justify-content-between gap-2 py-2 border-bottom">
+          <a href="{% url 'cms:message_detail' msg.pk %}">{{ msg.name }} — {{ msg.subject|default:msg.get_reason_display }}</a>
+          <span class="badge {% if msg.status == 'unread' %}bg-danger{% else %}bg-secondary{% endif %}">{{ msg.get_status_display }}</span>
+        </li>
+        {% empty %}<li class="text-muted py-2">No messages yet. When someone uses the Contact form, it will appear here.</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="stat-card h-100">
+      <h2 class="h6 mb-3">Latest blog posts</h2>
+      <ul class="list-unstyled mb-0">
+        {% for post in recent_posts %}
+        <li class="d-flex justify-content-between gap-2 py-2 border-bottom">
+          <a href="{% url 'cms:post_edit' post.pk %}">{{ post.title }}</a>
+          <span class="badge {% if post.status == 'published' %}bg-success{% else %}bg-warning text-dark{% endif %}">{% if post.status == 'published' %}Visible{% else %}Hidden{% endif %}</span>
+        </li>
+        {% empty %}<li class="text-muted py-2">No posts yet. <a href="{% url 'cms:post_add' %}">Write the first one</a>.</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="help-box mt-4">
+  <p><strong>Tip:</strong> Use <strong>View website ↗</strong> at the top right to check your changes. To hide something without deleting it, set <strong>Visibility</strong> to <em>Draft</em>.</p>
+</div>
+{% endblock %}

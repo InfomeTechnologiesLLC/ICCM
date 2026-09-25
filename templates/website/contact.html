@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Contact — {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero" id="top">
+  <div class="shell" style="padding-block:2.5rem 3rem;">
+    <div class="row g-4 align-items-end">
+      <div class="col-lg-7">
+        <span class="chip mb-3"><span class="material-symbols-outlined ms-16">waving_hand</span> We would love to hear from you</span>
+        <h1 class="headline-xl mb-3">Contact the Mission</h1>
+        <p class="body-lg text-muted-warm mb-0" style="max-width:34rem;">
+          Questions about our churches, ICTC, a prayer request, or partnering with the work in
+          Punjab and Kerala &mdash; write to us and someone will reply.
+        </p>
+      </div>
+      <div class="col-lg-5">
+        <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+          <a href="#write" class="chip chip-filter">Send a message</a>
+          <a href="#support" class="chip chip-filter">Support</a>
+          <a href="#pray" class="chip chip-filter">Prayer</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if sent %}
+<section class="shell mt-3"><div class="alert alert-success">Thank you for writing to us — someone from the mission office will reply soon.</div></section>
+{% endif %}
+{% if subscribed %}
+<section class="shell mt-3"><div class="alert alert-success">You're subscribed to mission updates. Thank you!</div></section>
+{% endif %}
+{% if prayed %}
+<section class="shell mt-3"><div class="alert alert-success">You've been added to the prayer list.</div></section>
+{% endif %}
+
+<section class="section-sm">
+  <div class="shell">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="card-warm h-100 p-4">
+          <p class="label-md mb-3 d-flex align-items-center gap-2"><span class="material-symbols-outlined ms-20">location_on</span> Mission Office</p>
+          <p class="title-md mb-1">{{ site_settings.address|default:"Kerala &amp; Punjab, India" }}</p>
+          {% if site_settings.google_maps_url %}<a href="{{ site_settings.google_maps_url }}" target="_blank" rel="noopener" class="link-arrow">Get directions <span class="material-symbols-outlined">arrow_forward</span></a>{% endif %}
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-warm h-100 p-4">
+          <p class="label-md mb-3 d-flex align-items-center gap-2"><span class="material-symbols-outlined ms-20">call</span> Speak With Us</p>
+          <ul class="list-unstyled body-sm text-muted-warm d-grid gap-1 mb-3">
+            {% if site_settings.phone %}<li>Office: <a href="tel:{{ site_settings.phone }}" class="text-decoration-none">{{ site_settings.phone }}</a></li>{% endif %}
+            {% if site_settings.whatsapp_number %}<li>WhatsApp: <a href="https://wa.me/{{ site_settings.whatsapp_number }}" class="text-decoration-none">{{ site_settings.whatsapp_number }}</a></li>{% endif %}
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-warm h-100 p-4">
+          <p class="label-md mb-3 d-flex align-items-center gap-2"><span class="material-symbols-outlined ms-20">mail</span> Write to Us</p>
+          <ul class="list-unstyled body-sm text-muted-warm d-grid gap-1 mb-3">
+            {% if site_settings.email %}<li>General: <a href="mailto:{{ site_settings.email }}" class="text-decoration-none">{{ site_settings.email }}</a></li>{% endif %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="write">
+  <div class="shell">
+    <div class="row g-4 g-xl-5">
+      <div class="col-lg-5">
+        <p class="eyebrow mb-2"><span class="material-symbols-outlined ms-16">edit_note</span> Send a Message</p>
+        <h2 class="headline-lg mb-3">Tell Us How We Can Help</h2>
+        <p class="body-md text-muted-warm mb-4">
+          Whether you are looking for a church near you, asking about studying at ICTC, or want to
+          walk with us in the work, this reaches the mission office directly.
+        </p>
+        <div class="card-media ratio-media photo-warm mb-3 reveal" style="border-radius:var(--r-xl);">
+          <img src="{% static 'img/iccm/contact.jpeg' %}" alt="Thomas and Sali Thomas">
+        </div>
+        <div class="card-warm card-warm--flat p-3">
+          <p class="label-md mb-1 d-flex align-items-center gap-2"><span class="material-symbols-outlined ms-20">verified_user</span> Held in Confidence</p>
+          <p class="body-sm text-muted-warm mb-0">Prayer requests and personal matters are read only by the mission leadership.</p>
+        </div>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="card-warm p-4 p-xl-5">
+          <form class="row g-3" method="post" action="{% url 'website:contact' %}#top" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="contact">
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.name.id_for_label }}">Your Name *</label>
+              {{ form.name }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.email.id_for_label }}">Email Address *</label>
+              {{ form.email }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.phone.id_for_label }}">Phone / WhatsApp</label>
+              {{ form.phone }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.subject.id_for_label }}">Subject</label>
+              {{ form.subject }}
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="{{ form.reason.id_for_label }}">What is this about? *</label>
+              {{ form.reason }}
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="{{ form.message.id_for_label }}">Your Message *</label>
+              {{ form.message }}
+            </div>
+            {% if form.errors %}
+            <div class="col-12"><div class="alert alert-danger mb-0">Please check the highlighted fields and try again.</div></div>
+            {% endif %}
+            <div class="col-12 d-flex flex-wrap align-items-center justify-content-between gap-3">
+              <p class="body-sm text-outline mb-0">We never share your details with anyone.</p>
+              <button type="submit" class="btn btn-forest">Send Message <span class="material-symbols-outlined ms-18">send</span></button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-surface-low" id="support">
+  <div class="shell">
+    <div class="text-center mb-5">
+      <p class="eyebrow eyebrow--muted justify-content-center mb-2">Partner With Us</p>
+      <h2 class="headline-lg mb-3" style="max-width:32rem;margin-inline:auto;">Support the Work in India</h2>
+      <p class="body-md text-muted-warm mb-0" style="max-width:36rem;margin-inline:auto;">
+        The mission is carried by churches and individuals who give and pray. Your support helps
+        our preachers share the Gospel, train students at ICTC and care for families in need.
+      </p>
+    </div>
+    <div class="row g-3 g-lg-4">
+      <div class="col-md-4">
+        <article class="card-warm card-lift h-100 p-4 reveal d-flex flex-column">
+          <span class="pathway-icon pathway-icon--brass mb-3"><span class="material-symbols-outlined ms-24">school</span></span>
+          <h3 class="headline-sm mb-2">Sponsor a Student</h3>
+          <p class="body-sm text-muted-warm flex-grow-1 mb-3">Help a young man or woman train at ICTC to preach the Gospel to their own people.</p>
+          <a href="#write" class="btn btn-quiet">Sponsor a student</a>
+        </article>
+      </div>
+      <div class="col-md-4">
+        <article class="card-warm card-lift h-100 p-4 reveal d-flex flex-column">
+          <span class="pathway-icon pathway-icon--forest mb-3"><span class="material-symbols-outlined ms-24">church</span></span>
+          <h3 class="headline-sm mb-2">Support a New Church</h3>
+          <p class="body-sm text-muted-warm flex-grow-1 mb-3">Help establish churches where there is no Church of Christ yet in Punjab and Kerala.</p>
+          <a href="#write" class="btn btn-quiet">Give toward a church plant</a>
+        </article>
+      </div>
+      <div class="col-md-4">
+        <article class="card-warm card-lift h-100 p-4 reveal d-flex flex-column">
+          <span class="pathway-icon mb-3"><span class="material-symbols-outlined ms-24">volunteer_activism</span></span>
+          <h3 class="headline-sm mb-2">General Fund</h3>
+          <p class="body-sm text-muted-warm flex-grow-1 mb-3">Give where the need is greatest, including food, clothing and medical help for families in need.</p>
+          <a href="#write" class="btn btn-quiet">Give to the general fund</a>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="pray">
+  <div class="shell">
+    <div class="row g-4 g-xl-5 align-items-center">
+      <div class="col-lg-6">
+        <p class="eyebrow mb-2"><span class="material-symbols-outlined ms-16">back_hand</span> Prayer</p>
+        <h2 class="headline-lg mb-3">Join the Prayer List</h2>
+        <p class="body-md text-muted-warm mb-0">
+          Get occasional prayer requests from our churches, preachers and ICTC straight to your inbox.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <form method="post" action="{% url 'website:contact' %}#pray" class="card-warm p-4 d-grid gap-3" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="prayer">
+          <div>
+            <label class="form-label" for="{{ prayer_form.name.id_for_label }}">Your Name</label>
+            {{ prayer_form.name }}
+          </div>
+          <div>
+            <label class="form-label" for="{{ prayer_form.email.id_for_label }}">Email Address</label>
+            {{ prayer_form.email }}
+          </div>
+          <button type="submit" class="btn btn-forest">Join the Prayer List</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

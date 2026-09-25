@@ -1,0 +1,27 @@
+{% extends "cms/base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Users</h1>
+<p class="text-muted">Full user, group and permission management (add users, assign the Content Manager
+or Editor role) lives in the <a href="/django-admin/auth/user/">Django admin</a> — this keeps
+sensitive account management on one well-tested screen.</p>
+<div class="stat-card p-0">
+  <table class="table mb-0 align-middle">
+    <thead class="table-light"><tr><th>Username</th><th>Name</th><th>Email</th><th>Role</th><th>Active</th></tr></thead>
+    <tbody>
+      {% for u in object_list %}
+      <tr>
+        <td>{{ u.username }}</td>
+        <td>{{ u.get_full_name }}</td>
+        <td>{{ u.email }}</td>
+        <td>
+          {% if u.is_superuser %}<span class="badge bg-dark">Super Admin</span>
+          {% else %}{% for g in u.groups.all %}<span class="badge bg-secondary">{{ g.name }}</span> {% empty %}<span class="text-muted">—</span>{% endfor %}{% endif %}
+        </td>
+        <td>{% if u.is_active %}Yes{% else %}No{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Access Denied — {{ site_settings.site_name|default:"India Church of Christ Mission" }}{% endblock %}
+{% block content %}
+<section class="section text-center">
+  <div class="shell">
+    <p class="eyebrow eyebrow--muted justify-content-center mb-3">403</p>
+    <h1 class="headline-xl mb-3">Access denied</h1>
+    <p class="body-md text-muted-warm mb-4">You don't have permission to view this page.</p>
+    <a href="/" class="btn btn-forest btn-lg-soft">Back to Home</a>
+  </div>
+</section>
+{% endblock %}

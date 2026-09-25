@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ event.name }} — {{ site_settings.site_name }}{% endblock %}
+{% block meta_description %}{{ event.seo_description|default:event.short_description }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="shell" style="padding-block:2.5rem 3rem;">
+    <div class="row g-4 align-items-end">
+      <div class="col-lg-8">
+        <span class="chip mb-3"><span class="material-symbols-outlined ms-16">calendar_month</span> {{ event.start_date|date:"d M Y" }}</span>
+        <h1 class="headline-xl mb-3">{{ event.name }}</h1>
+        <p class="body-lg text-muted-warm mb-0" style="max-width:34rem;">{{ event.short_description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="row g-4 g-xl-5">
+      <div class="col-lg-7">
+        <div class="card-media ratio-media photo-warm reveal mb-4" style="border-radius:var(--r-xl);">
+          {% if event.featured_image %}<img src="{{ event.featured_image.url }}" alt="{{ event.name }}">{% endif %}
+        </div>
+        <div class="body-md text-muted-warm">{{ event.description|safe }}</div>
+
+        {% if event.gallery.all %}
+        <div class="gallery mt-4">
+          {% for img in event.gallery.all %}
+          <a href="{{ img.image.url }}"><img src="{{ img.image.url }}" alt="{{ img.caption }}"></a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="col-lg-5">
+        <div class="card-warm p-4 p-xl-5 sticky-side">
+          <h3 class="headline-sm mb-3">Event Details</h3>
+          <ul class="list-unstyled body-sm text-muted-warm d-grid gap-3 mb-4">
+            <li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">event</span>
+              {{ event.start_date|date:"d M Y" }}{% if event.end_date %} &ndash; {{ event.end_date|date:"d M Y" }}{% endif %}
+            </li>
+            {% if event.start_time %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">schedule</span> {{ event.start_time|time:"g:i A" }}{% if event.end_time %} &ndash; {{ event.end_time|time:"g:i A" }}{% endif %}</li>{% endif %}
+            {% if event.venue %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">location_on</span> {{ event.venue }}{% if event.address %}, {{ event.address }}{% endif %}</li>{% endif %}
+            {% if event.organizer %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">groups</span> Organised by {{ event.organizer }}</li>{% endif %}
+            {% if event.contact_phone %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">call</span> <a href="tel:{{ event.contact_phone }}">{{ event.contact_phone }}</a></li>{% endif %}
+            {% if event.contact_email %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18 text-outline">mail</span> <a href="mailto:{{ event.contact_email }}">{{ event.contact_email }}</a></li>{% endif %}
+          </ul>
+          {% if event.registration_url %}
+          <a href="{{ event.registration_url }}" target="_blank" rel="noopener" class="btn btn-brass btn-lg-soft w-100">Register</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

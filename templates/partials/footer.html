@@ -1,0 +1,91 @@
+{% load static %}
+<!-- ============================== Footer =============================== -->
+<footer class="site-footer">
+  <div class="shell">
+    <div class="row g-4 g-lg-5">
+
+      <div class="col-lg-4">
+        <span class="brand-lockup mb-3">
+          {% if site_settings.logo %}
+            <img src="{{ site_settings.logo.url }}" alt="" class="brand-mark" width="32" height="32">
+          {% else %}
+            <img src="{% static 'img/logo-mark.svg' %}" alt="" class="brand-mark" width="32" height="32">
+          {% endif %}
+          <span class="brand-text">
+            <span class="brand-word">{{ site_settings.site_name }}</span>
+            <span class="brand-sub">{{ site_settings.tagline }}</span>
+          </span>
+        </span>
+        <p class="body-sm mb-4" style="max-width:24rem;">{{ site_settings.footer_about }}</p>
+        <ul class="list-unstyled body-sm d-grid gap-2 mb-4">
+          {% if site_settings.address %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18">location_on</span> {{ site_settings.address }}</li>{% endif %}
+          {% if site_settings.email %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18">mail</span> <a href="mailto:{{ site_settings.email }}">{{ site_settings.email }}</a></li>{% endif %}
+          {% if site_settings.phone %}<li class="d-flex gap-2"><span class="material-symbols-outlined ms-18">call</span> <a href="tel:{{ site_settings.phone }}">{{ site_settings.phone }}</a></li>{% endif %}
+        </ul>
+        {% if site_settings.footer_hours %}
+        <div class="footer-hours">
+          <strong style="color:var(--surface);">Regular Gatherings</strong><br>
+          {{ site_settings.footer_hours|linebreaksbr }}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <h5>The Mission</h5>
+        <ul class="list-unstyled footer-links">
+          <li><a href="{% url 'website:about' %}">About Us</a></li>
+          <li><a href="{% url 'website:about' %}#beliefs">What We Believe</a></li>
+          <li><a href="{% url 'website:about' %}#leaders">Our Leaders</a></li>
+          <li><a href="{% url 'website:about' %}#story">Our Story</a></li>
+          <li><a href="{% url 'website:contact' %}">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <h5>Our Work</h5>
+        <ul class="list-unstyled footer-links">
+          <li><a href="{% url 'website:about' %}#story">Punjab &amp; Kerala</a></li>
+          <li><a href="{% url 'website:bible_school' %}">ICTC</a></li>
+          <li><a href="{% url 'website:bible_school' %}#courses">Courses</a></li>
+          <li><a href="{% url 'website:event_list' %}">Events</a></li>
+        </ul>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <h5>Ministries</h5>
+        <ul class="list-unstyled footer-links">
+          <li><a href="{% url 'website:ministry_list' %}">Our Ministries</a></li>
+          <li><a href="{% url 'website:contact' %}#support">Support the Mission</a></li>
+          <li><a href="{% url 'website:blog_list' %}">Blog &amp; News</a></li>
+          <li><a href="{% url 'website:gallery' %}">Photo Gallery</a></li>
+        </ul>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <h5>Stay in Touch</h5>
+        <form class="d-grid gap-2 mb-3" id="newsletterForm" method="post" action="{% url 'website:contact' %}#newsletter">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="newsletter">
+          <label class="visually-hidden" for="footerEmail">Email address</label>
+          <input type="email" name="email" class="form-control input-newsletter" id="footerEmail" placeholder="Your email address" required>
+          <button class="btn btn-brass" type="submit">Subscribe</button>
+        </form>
+
+        <div class="d-grid gap-2">
+          <a href="{% url 'website:contact' %}#support" class="chip chip-brass justify-content-center">
+            <span class="material-symbols-outlined ms-16">volunteer_activism</span> Give
+          </a>
+          <a href="{% url 'website:contact' %}#pray" class="chip chip-outline justify-content-center" style="background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14);color:rgba(242,240,237,.8);">
+            <span class="material-symbols-outlined ms-16">back_hand</span> Pray
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-note d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <p class="mb-0">&copy; <span data-year>2026</span> {{ site_settings.footer_text }}. {{ site_settings.copyright_text }}</p>
+      <p class="mb-0">Punjab &bull; Kerala &bull; India</p>
+    </div>
+  </div>
+</footer>
