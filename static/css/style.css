@@ -353,7 +353,7 @@ h1, h2, h3, h4,
 }
 
 .brand-lockup { display: inline-flex; align-items: center; gap: .625rem; text-decoration: none; }
-.brand-mark   { width: 2rem; height: 2rem; flex: 0 0 auto; transform: rotate(270deg); }
+.brand-mark   { width: 2rem; height: 2rem; flex: 0 0 auto;  }
 .brand-word {
   font-family: "Playfair Display", Georgia, serif;
   font-size: 1.25rem; font-weight: 600; color: var(--primary-container); line-height: 1;
