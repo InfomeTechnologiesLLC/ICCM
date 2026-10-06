@@ -12,6 +12,10 @@ urlpatterns = [
     # Settings / singletons
     path("settings/", v.SiteSettingsUpdateView.as_view(), name="settings"),
     path("home/hero/", v.HeroSectionUpdateView.as_view(), name="hero"),
+    path("home/slides/", v.HeroSlideListView.as_view(), name="heroslide_list"),
+    path("home/slides/add/", v.HeroSlideCreateView.as_view(), name="heroslide_add"),
+    path("home/slides/<int:pk>/edit/", v.HeroSlideUpdateView.as_view(), name="heroslide_edit"),
+    path("home/slides/<int:pk>/delete/", v.HeroSlideDeleteView.as_view(), name="heroslide_delete"),
     path("home/welcome/", v.HomeAboutUpdateView.as_view(), name="home_about"),
     path("home/cta/", v.CallToActionUpdateView.as_view(), name="cta"),
     path("about/", v.AboutPageUpdateView.as_view(), name="about_page"),

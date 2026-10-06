@@ -41,6 +41,18 @@ class HeroSectionForm(BootstrapModelForm):
         model = m.HeroSection
         exclude = []
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["background_image"].help_text = (
+            "Only used when there are no banner slides. To change the sliding photos, "
+            "go to Home page → Banner slides.")
+
+
+class HeroSlideForm(BootstrapModelForm):
+    class Meta:
+        model = m.HeroSlide
+        fields = ["image", "alt_text", "order", "is_active"]
+
 
 class HomeAboutSectionForm(BootstrapModelForm):
     class Meta:

@@ -14,7 +14,7 @@ CONTENT_MODELS = [
 # Singletons/settings a Content Manager may edit but that only a Super Admin
 # should be able to touch structurally.
 SETTINGS_MODELS = [
-    m.SiteSettings, m.HeroSection, m.HomeAboutSection, m.AboutPage,
+    m.SiteSettings, m.HeroSection, m.HeroSlide, m.HomeAboutSection, m.AboutPage,
     m.BibleSchool, m.CallToAction,
 ]
 

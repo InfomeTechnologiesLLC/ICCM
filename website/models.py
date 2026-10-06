@@ -166,6 +166,24 @@ class HeroSection(models.Model):
         return obj
 
 
+class HeroSlide(models.Model):
+    """One photo in the home page banner slider. The banner's heading, text
+    and buttons stay the same (HeroSection); only the photo behind them changes."""
+    image = models.ImageField(upload_to="home/slides/")
+    alt_text = models.CharField("Photo description", max_length=200, blank=True,
+        help_text="A few words describing the photo, for visitors using screen readers.")
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "Banner slide"
+        verbose_name_plural = "Banner slides"
+
+    def __str__(self):
+        return self.alt_text or f"Slide {self.order}"
+
+
 class HomeAboutSection(models.Model):
     title = models.CharField(max_length=200, default="Welcome to the Mission")
     description = RichTextField(blank=True)

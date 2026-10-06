@@ -8,12 +8,40 @@
 <!-- =============================== Hero ================================ -->
 <section class="hero hero-full">
   <div class="hero-bg">
-    {% if hero.background_image %}
+    {% if hero_slides|length > 1 %}
+      <div id="heroSlider" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="6000" data-bs-pause="false" aria-label="Banner photos">
+        <div class="carousel-inner">
+          {% for slide in hero_slides %}
+          <div class="carousel-item{% if forloop.first %} active{% endif %}">
+            <img src="{{ slide.image.url }}" alt="{{ slide.alt_text }}"{% if not forloop.first %} loading="lazy"{% endif %}>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% elif hero_slides %}
+      <img src="{{ hero_slides.0.image.url }}" alt="{{ hero_slides.0.alt_text }}">
+    {% elif hero.background_image %}
       <img src="{{ hero.background_image.url }}" alt="">
     {% else %}
       <img src="{% static 'img/iccm/hero.jpeg' %}" alt="ICCM church members gathered together">
     {% endif %}
   </div>
+  {% if hero_slides|length > 1 %}
+  <div class="hero-slider-dots carousel-indicators">
+    {% for slide in hero_slides %}
+    <button type="button" data-bs-target="#heroSlider" data-bs-slide-to="{{ forloop.counter0 }}"{% if forloop.first %} class="active" aria-current="true"{% endif %} aria-label="Show photo {{ forloop.counter }}"></button>
+    {% endfor %}
+  </div>
+  <script>
+    /* The dots sit above the banner overlay (outside the carousel), so keep their active state in sync. */
+    document.getElementById('heroSlider').addEventListener('slide.bs.carousel', function (e) {
+      document.querySelectorAll('.hero-slider-dots button').forEach(function (b, i) {
+        b.classList.toggle('active', i === e.to);
+        if (i === e.to) { b.setAttribute('aria-current', 'true'); } else { b.removeAttribute('aria-current'); }
+      });
+    });
+  </script>
+  {% endif %}
   <div class="shell">
     <div class="row">
       <div class="col-lg-9 col-xl-8">

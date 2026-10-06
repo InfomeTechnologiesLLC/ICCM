@@ -66,6 +66,7 @@
 
     <h6>Home page</h6>
     <a href="{% url 'cms:hero' %}" class="{% if current == 'hero' %}active{% endif %}"><span class="ico">🖼️</span> Top banner</a>
+    <a href="{% url 'cms:heroslide_list' %}" class="{% if current == 'heroslide' %}active{% endif %}"><span class="ico">🎞️</span> Banner slides</a>
     <a href="{% url 'cms:home_about' %}" class="{% if current == 'home_about' %}active{% endif %}"><span class="ico">👋</span> Welcome / About box</a>
     <a href="{% url 'cms:statistic_list' %}" class="{% if current == 'statistic' %}active{% endif %}"><span class="ico">🔢</span> Numbers strip</a>
     <a href="{% url 'cms:cta' %}" class="{% if current == 'cta' %}active{% endif %}"><span class="ico">🤝</span> Support box</a>

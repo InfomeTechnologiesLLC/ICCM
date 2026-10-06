@@ -683,6 +683,20 @@ h1, h2, h3, h4,
 .hero-full .shell { width: 100%; padding-block: 3rem; }
 @media (max-width: 575.98px) { .hero-full { min-height: 34rem; } }
 
+/* --- Hero banner slider (photos crossfade behind the fixed heading) --- */
+.hero-bg .carousel, .hero-bg .carousel-inner, .hero-bg .carousel-item { height: 100%; }
+.hero-bg .carousel-fade .carousel-item { transition-duration: 1.2s; }
+.hero-slider-dots.carousel-indicators {
+  z-index: 3; margin-bottom: 4rem; justify-content: flex-end;
+  margin-right: max(1rem, calc((100% - 1320px) / 2 + 1.5rem)); margin-left: auto;
+}
+.hero-slider-dots.carousel-indicators [data-bs-target] {
+  width: .625rem; height: .625rem; border-radius: 50%; border: 0; margin: 0 .3rem;
+  background-color: var(--surface); opacity: .45; transition: opacity .3s, transform .3s;
+}
+.hero-slider-dots.carousel-indicators .active { opacity: 1; transform: scale(1.25); background-color: var(--tertiary-fixed, #e9c46a); }
+@media (max-width: 575.98px) { .hero-slider-dots.carousel-indicators { margin-bottom: 3.5rem; justify-content: center; margin-right: 0; } }
+
 /* --- Photo mosaic --- */
 .mosaic {
   display: grid; gap: .75rem;

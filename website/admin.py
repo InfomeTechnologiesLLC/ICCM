@@ -28,6 +28,12 @@ class HeroSectionAdmin(admin.ModelAdmin):
         return False
 
 
+@admin.register(m.HeroSlide)
+class HeroSlideAdmin(admin.ModelAdmin):
+    list_display = ("__str__", "order", "is_active")
+    list_editable = ("order", "is_active")
+
+
 @admin.register(m.HomeAboutSection)
 class HomeAboutSectionAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):

@@ -36,6 +36,10 @@ SECTION_HELP = {
                  "to hide a link without deleting it.", "The top of every page.", "website:home"),
     "hero": ("The large banner with a photo that visitors see first.",
              "The top of the home page.", "website:home"),
+    "heroslide": ("The photos that slide one after another behind the banner heading. "
+                  "Add two or more to make the banner a slider; with one photo it stays still. "
+                  "Use wide landscape photos (at least 1600 pixels wide).",
+                  "The top of the home page.", "website:home"),
     "home_about": ("The short “About us” box with a photo, below the banner.",
                    "The home page, under the banner.", "website:home"),
     "statistic": ("The numbers strip, for example “10 Local churches”.",

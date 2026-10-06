@@ -8,12 +8,13 @@ from .forms import ContactForm, NewsletterForm, PrayerListForm
 from .models import (
     AboutPage, BeliefStatement, BibleSchool, BibleSchoolCourse, BlogCategory, BlogPost,
     CallToAction, Church, Event, Faculty, FlatPage, GalleryAlbum, GalleryImage, HeroSection,
-    HomeAboutSection, Leader, Ministry, Statistic, TimelineEvent,
+    HeroSlide, HomeAboutSection, Leader, Ministry, Statistic, TimelineEvent,
 )
 
 
 def home(request):
     hero = HeroSection.load()
+    hero_slides = HeroSlide.objects.filter(is_active=True)
     welcome = HomeAboutSection.load()
     stats = Statistic.objects.all()
     cta = CallToAction.objects.filter(key="home").first()
@@ -37,6 +38,7 @@ def home(request):
 
     context = {
         "hero": hero,
+        "hero_slides": hero_slides,
         "welcome": welcome,
         "stats": stats,
         "cta": cta,

@@ -416,6 +416,11 @@ StatisticListView, StatisticCreateView, StatisticUpdateView, StatisticDeleteView
     m.Statistic, f.StatisticForm, "Statistics", [("Label", "label"), ("Value", "value"), ("Order", "order")],
     "statistic", "statistic")
 
+HeroSlideListView, HeroSlideCreateView, HeroSlideUpdateView, HeroSlideDeleteView = _simple_crud(
+    m.HeroSlide, f.HeroSlideForm, "Banner slides",
+    [("Description", "alt_text"), ("Position", "order"), ("Shown", "is_active")],
+    "heroslide", "heroslide")
+
 LeaderListView, LeaderCreateView, LeaderUpdateView, LeaderDeleteView = _simple_crud(
     m.Leader, f.LeaderForm, "Leaders", [("Name", "name"), ("Role", "role"), ("Active", "is_active")],
     "leader", "leader")
