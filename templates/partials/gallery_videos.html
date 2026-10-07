@@ -1,0 +1,82 @@
+{% comment %}
+  Video grid for the Gallery and album pages. Expects `videos`.
+  YouTube videos show a cover picture and only load the YouTube player when
+  clicked (keeps the page fast). Uploaded videos use the browser's own player.
+{% endcomment %}
+<style>
+  .video-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 991.98px) { .video-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 575.98px) { .video-grid { grid-template-columns: 1fr; } }
+  .video-card { background: var(--surface-lowest, #fff); border-radius: 1rem; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; flex-direction: column; }
+  .video-frame { position: relative; aspect-ratio: 16 / 9; background: #0b1a14; }
+  .video-frame > img, .video-frame > iframe, .video-frame > video {
+    position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; }
+  .video-frame > video { object-fit: contain; background: #000; }
+  .video-play { position: absolute; inset: 0; width: 100%; border: 0; padding: 0; cursor: pointer;
+    background: transparent; display: flex; align-items: center; justify-content: center; }
+  .video-play::before { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,.05) 60%); transition: background .2s ease; }
+  .video-play:hover::before { background: linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,.15)); }
+  .video-play .play-dot { position: relative; width: 4.25rem; height: 4.25rem; border-radius: 50%;
+    background: var(--secondary-container, #fece57); color: var(--primary, #07241a);
+    display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,.3);
+    transition: transform .2s ease; }
+  .video-play:hover .play-dot, .video-play:focus-visible .play-dot { transform: scale(1.08); }
+  .video-play .play-dot .material-symbols-outlined { font-size: 2.4rem; margin-left: .15rem; }
+  .video-play:focus-visible { outline: 3px solid var(--secondary-container, #fece57); outline-offset: -3px; }
+  .video-meta { padding: 1rem 1.1rem 1.15rem; }
+  .video-meta h3 { margin: 0 0 .25rem; }
+  .video-meta p { margin: 0; }
+</style>
+
+<div class="video-grid">
+  {% for video in videos %}
+  <article class="video-card reveal">
+    <div class="video-frame">
+      {% if video.is_youtube %}
+        <img src="{{ video.preview_url }}" alt="" loading="lazy">
+        <button type="button" class="video-play" data-yt-embed="{{ video.embed_url }}" data-yt-title="{{ video.title }}"
+                aria-label="Play video: {{ video.title }}">
+          <span class="play-dot"><span class="material-symbols-outlined" aria-hidden="true">play_arrow</span></span>
+        </button>
+      {% elif video.video_file %}
+        <video controls preload="metadata" playsinline {% if video.thumbnail %}poster="{{ video.thumbnail.url }}"{% endif %}
+               aria-label="{{ video.title }}">
+          <source src="{{ video.video_file.url }}#t=0.1">
+          Your browser cannot play this video. <a href="{{ video.video_file.url }}">Download it</a>.
+        </video>
+      {% endif %}
+    </div>
+    <div class="video-meta">
+      <h3 class="headline-sm">{{ video.title }}</h3>
+      {% if video.description %}<p class="text-muted-warm small">{{ video.description }}</p>{% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+
+<script>
+(function () {
+  document.querySelectorAll('[data-yt-embed]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var frame = document.createElement('iframe');
+      frame.src = btn.getAttribute('data-yt-embed');
+      frame.title = btn.getAttribute('data-yt-title') || 'YouTube video';
+      frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      frame.allowFullscreen = true;
+      frame.referrerPolicy = 'strict-origin-when-cross-origin';
+      var box = btn.parentNode;
+      box.innerHTML = '';
+      box.appendChild(frame);
+    });
+  });
+  // Only one uploaded video plays at a time
+  var vids = document.querySelectorAll('.video-frame video');
+  vids.forEach(function (v) {
+    v.addEventListener('play', function () {
+      vids.forEach(function (o) { if (o !== v) o.pause(); });
+    });
+  });
+})();
+</script>

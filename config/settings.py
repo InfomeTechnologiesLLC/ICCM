@@ -147,6 +147,10 @@ ALLOWED_DOCUMENT_EXTENSIONS = [".pdf", ".doc", ".docx"]
 MAX_UPLOAD_SIZE_MB = int(os.environ.get("MAX_UPLOAD_SIZE_MB", "8"))
 DATA_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE_MB * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE_MB * 1024 * 1024
+# Uploaded gallery videos (MP4/WebM). Long videos are better on YouTube.
+# Your web server (nginx client_max_body_size / Apache LimitRequestBody / cPanel)
+# must allow uploads at least this big too.
+MAX_VIDEO_UPLOAD_MB = int(os.environ.get("MAX_VIDEO_UPLOAD_MB", "100"))
 
 CKEDITOR_UPLOAD_PATH = "ckeditor_uploads/"
 CKEDITOR_CONFIGS = {

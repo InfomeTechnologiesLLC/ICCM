@@ -7,7 +7,7 @@ from django.views.decorators.http import require_http_methods
 from .forms import ContactForm, NewsletterForm, PrayerListForm
 from .models import (
     AboutPage, BeliefStatement, BibleSchool, BibleSchoolCourse, BlogCategory, BlogPost,
-    CallToAction, Church, Event, Faculty, FlatPage, GalleryAlbum, GalleryImage, HeroSection,
+    CallToAction, Church, Event, Faculty, FlatPage, GalleryAlbum, GalleryImage, GalleryVideo, HeroSection,
     HeroSlide, HomeAboutSection, Leader, Ministry, Statistic, TimelineEvent,
 )
 
@@ -122,14 +122,17 @@ def gallery(request):
     tag = request.GET.get("filter")
     if tag:
         images = images.filter(tag=tag)
+    videos = GalleryVideo.objects.filter(is_active=True).select_related("album")
     return render(request, "website/gallery.html", {
-        "albums": albums, "images": images, "active_filter": tag or "all",
+        "albums": albums, "images": images, "videos": videos, "active_filter": tag or "all",
     })
 
 
 def gallery_album(request, slug):
     album = get_object_or_404(GalleryAlbum, slug=slug, status="published")
-    return render(request, "website/gallery_album.html", {"album": album, "images": album.images.all()})
+    return render(request, "website/gallery_album.html", {
+        "album": album, "images": album.images.all(), "videos": album.videos.filter(is_active=True),
+    })
 
 
 def blog_list(request):

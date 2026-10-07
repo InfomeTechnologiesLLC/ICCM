@@ -1,10 +1,33 @@
-{% load static %}<!DOCTYPE html>
+{% load static seo_tags %}<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}{{ site_settings.default_seo_title|default:site_settings.site_name }}{% endblock %}</title>
-<meta name="description" content="{% block meta_description %}{{ site_settings.default_seo_description|default:site_settings.description }}{% endblock %}">
+{% page_seo as seo %}
+<title>{% if seo.title %}{{ seo.title }}{% else %}{% block title %}{{ seo.default_title|default:site_settings.site_name }}{% endblock %}{% endif %}</title>
+<meta name="description" content="{% if seo.description %}{{ seo.description }}{% else %}{% block meta_description %}{{ site_settings.default_seo_description|default:site_settings.description }}{% endblock %}{% endif %}">
+{% if seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}
+<meta name="robots" content="{{ seo.robots }}">
+{% if seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
+{% if seo.google_verification %}<meta name="google-site-verification" content="{{ seo.google_verification }}">{% endif %}
+
+{# Open Graph: link previews on WhatsApp, Facebook, LinkedIn #}
+<meta property="og:type" content="{{ seo.type }}">
+<meta property="og:site_name" content="{{ seo.site_name }}">
+<meta property="og:title" content="{{ seo.og_title }}">
+<meta property="og:description" content="{{ seo.og_description }}">
+{% if seo.url %}<meta property="og:url" content="{{ seo.url }}">{% endif %}
+<meta property="og:locale" content="en_IN">
+{% if seo.image %}<meta property="og:image" content="{{ seo.image }}">
+<meta property="og:image:alt" content="{{ seo.image_alt }}">{% endif %}
+{% if seo.published_time %}<meta property="article:published_time" content="{{ seo.published_time }}">{% endif %}
+{% if seo.modified_time %}<meta property="article:modified_time" content="{{ seo.modified_time }}">{% endif %}
+
+{# Twitter / X card #}
+<meta name="twitter:card" content="{% if seo.image %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:title" content="{{ seo.og_title }}">
+<meta name="twitter:description" content="{{ seo.og_description }}">
+{% if seo.image %}<meta name="twitter:image" content="{{ seo.image }}">{% endif %}
 
 {% if site_settings.favicon %}
 <link rel="icon" href="{{ site_settings.favicon.url }}">

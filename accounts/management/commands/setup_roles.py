@@ -6,7 +6,7 @@ from website import models as m
 # Models a Content Manager may fully manage (add/change/delete/publish).
 CONTENT_MODELS = [
     m.Church, m.ChurchImage, m.Ministry, m.MinistryImage, m.Event, m.EventImage,
-    m.GalleryAlbum, m.GalleryImage, m.BlogPost, m.BlogCategory, m.BlogTag,
+    m.GalleryAlbum, m.GalleryImage, m.GalleryVideo, m.BlogPost, m.BlogCategory, m.BlogTag,
     m.BibleSchoolCourse, m.Faculty, m.Leader, m.BeliefStatement, m.TimelineEvent,
     m.Statistic, m.FlatPage, m.MediaAsset, m.MenuItem, m.ContactMessage,
 ]
@@ -15,8 +15,12 @@ CONTENT_MODELS = [
 # should be able to touch structurally.
 SETTINGS_MODELS = [
     m.SiteSettings, m.HeroSection, m.HeroSlide, m.HomeAboutSection, m.AboutPage,
-    m.BibleSchool, m.CallToAction,
+    m.BibleSchool, m.CallToAction, m.PageSEO,
 ]
+
+# Website sign-ups (prayer list, newsletter). Content Managers can view, export
+# and remove them; Editors can only view them.
+SIGNUP_MODELS = [m.NewsletterSubscriber, m.PrayerListSignup]
 
 
 class Command(BaseCommand):
@@ -27,7 +31,7 @@ class Command(BaseCommand):
         editor, _ = Group.objects.get_or_create(name="Editor")
 
         cm_perms = []
-        for model in CONTENT_MODELS + SETTINGS_MODELS:
+        for model in CONTENT_MODELS + SETTINGS_MODELS + SIGNUP_MODELS:
             cm_perms += list(Permission.objects.filter(
                 content_type__app_label=model._meta.app_label,
                 content_type__model=model._meta.model_name,
@@ -46,6 +50,11 @@ class Command(BaseCommand):
                     f"change_{model._meta.model_name}",
                     f"view_{model._meta.model_name}",
                 ],
+            ))
+        for model in SIGNUP_MODELS:
+            editor_perms += list(Permission.objects.filter(
+                content_type__app_label=model._meta.app_label,
+                codename=f"view_{model._meta.model_name}",
             ))
         editor.permissions.set(editor_perms)
 

@@ -24,6 +24,7 @@
 {% block content %}
 {% section_help as help %}
 <h1 class="h3 mb-3">{{ title }}</h1>
+{% if page_link %}<p class="mb-3"><a href="{{ page_link }}" target="_blank" rel="noopener">Open this page on the website ↗</a></p>{% endif %}
 
 {% if help.what %}
 <div class="help-box form-card">
@@ -67,12 +68,13 @@
     {% endif %}{% endfor %}
 
     <details class="seo" id="seoBlock">
-      <summary>Google search settings (optional)</summary>
-      <p class="small text-muted">Only change these if you want a different title or description when this page appears in Google. You can leave them empty.</p>
+      <summary>Google search &amp; social sharing (optional)</summary>
+      <p class="small text-muted">The title, description and picture shown on Google and when this page is shared on WhatsApp, Facebook or X. You can leave them empty.</p>
       {% for field in form %}{% if field|is_seo %}
       <div class="field-block">
-        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field|nice_label }}</label>
         {% if field.widget_type == "clearablefile" or field.widget_type == "file" %}<div class="file-field">{{ field }}</div>{% else %}{{ field }}{% endif %}
+        {% with h=field|nice_help %}{% if h %}<div class="form-text">{{ h }}</div>{% endif %}{% endwith %}
         {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
       </div>
       {% endif %}{% endfor %}
@@ -112,12 +114,12 @@
     // Make the wording clearer
     box.childNodes.forEach(function (n) {
       if (n.nodeType === 3) {
-        n.textContent = n.textContent.replace('Currently:', 'Current file:').replace('Change:', 'Replace with a new photo:');
+        n.textContent = n.textContent.replace('Currently:', 'Current file:').replace('Change:', 'Replace with a new file:');
       }
     });
     if (clear) {
       var lab = box.querySelector('label[for="' + clear.id + '"]');
-      if (lab) lab.textContent = ' Remove this photo';
+      if (lab) lab.textContent = ' Remove this file';
     }
     if (input) {
       input.addEventListener('change', function () {

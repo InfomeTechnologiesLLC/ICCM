@@ -121,3 +121,96 @@ class CRUDLifecycleTests(TestCase):
         self.client.post(reverse("cms:message_detail", args=[msg.pk]), {"action": "archive"})
         msg.refresh_from_db()
         self.assertEqual(msg.status, "archived")
+
+
+class SignupScreenTests(TestCase):
+    """Prayer list and newsletter sign-ups are visible, exportable and removable in the CMS."""
+
+    def setUp(self):
+        call_command("setup_roles")
+        self.manager = User.objects.create_user("mgr", password="pass12345", is_staff=True)
+        self.manager.groups.add(Group.objects.get(name="Content Manager"))
+        self.editor = User.objects.create_user("ed", password="pass12345", is_staff=True)
+        self.editor.groups.add(Group.objects.get(name="Editor"))
+        self.signup = m.PrayerListSignup.objects.create(name="Ravi Kumar", email="ravi@example.org")
+        m.NewsletterSubscriber.objects.create(email="sub@example.org")
+
+    def test_manager_sees_and_exports_prayer_list(self):
+        self.client.login(username="mgr", password="pass12345")
+        response = self.client.get(reverse("cms:prayer_list"))
+        self.assertContains(response, "Ravi Kumar")
+        csv_response = self.client.get(reverse("cms:prayer_list") + "?export=csv")
+        self.assertEqual(csv_response["Content-Type"], "text/csv; charset=utf-8")
+        self.assertIn("ravi@example.org", csv_response.content.decode("utf-8-sig"))
+
+    def test_newsletter_search(self):
+        self.client.login(username="mgr", password="pass12345")
+        self.assertContains(self.client.get(reverse("cms:newsletter_list") + "?q=sub"), "sub@example.org")
+        self.assertNotContains(self.client.get(reverse("cms:newsletter_list") + "?q=nobody"), "sub@example.org")
+
+    def test_editor_can_view_but_not_delete(self):
+        self.client.login(username="ed", password="pass12345")
+        self.assertEqual(self.client.get(reverse("cms:prayer_list")).status_code, 200)
+        response = self.client.post(reverse("cms:prayer_list"), {"ids": [self.signup.pk]})
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(m.PrayerListSignup.objects.filter(pk=self.signup.pk).exists())
+
+    def test_manager_can_delete(self):
+        self.client.login(username="mgr", password="pass12345")
+        self.client.post(reverse("cms:prayer_list"), {"ids": [self.signup.pk]})
+        self.assertFalse(m.PrayerListSignup.objects.exists())
+
+
+class GalleryVideoCMSTests(TestCase):
+    def setUp(self):
+        User.objects.create_superuser("admin", "admin@example.org", "pass12345")
+        self.client.login(username="admin", password="pass12345")
+
+    def test_add_youtube_video(self):
+        response = self.client.post(reverse("cms:video_add"), {
+            "title": "Baptism", "youtube_url": "https://youtu.be/dQw4w9WgXcQ?si=x", "order": 0, "is_active": "on"})
+        self.assertEqual(response.status_code, 302)
+        video = m.GalleryVideo.objects.get()
+        self.assertEqual(video.youtube_id, "dQw4w9WgXcQ")
+        self.assertContains(self.client.get(reverse("website:gallery")),
+                            "youtube-nocookie.com/embed/dQw4w9WgXcQ")
+
+    def test_rejects_non_youtube_link_and_empty(self):
+        self.client.post(reverse("cms:video_add"), {
+            "title": "Bad", "youtube_url": "https://example.com/watch", "order": 0, "is_active": "on"})
+        self.client.post(reverse("cms:video_add"), {"title": "Empty", "order": 0, "is_active": "on"})
+        self.assertFalse(m.GalleryVideo.objects.exists())
+
+
+class PageSEOTests(TestCase):
+    def setUp(self):
+        User.objects.create_superuser("admin", "admin@example.org", "pass12345")
+        self.client.login(username="admin", password="pass12345")
+
+    def test_every_page_is_listed_and_editable(self):
+        response = self.client.get(reverse("cms:pageseo_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(m.PageSEO.objects.count(), len(m.PageSEO.PAGE_CHOICES))
+
+    def test_meta_and_og_tags_rendered(self):
+        row = m.PageSEO.objects.get(page="about")
+        self.client.post(reverse("cms:pageseo_edit", args=[row.pk]), {
+            "meta_title": "About ICCM", "meta_description": "Since 1996.",
+            "meta_keywords": "church", "og_title": "Meet ICCM", "og_description": ""})
+        html = self.client.get(reverse("website:about")).content.decode()
+        self.assertIn("<title>About ICCM</title>", html)
+        self.assertIn('<meta name="description" content="Since 1996.">', html)
+        self.assertIn('<meta property="og:title" content="Meet ICCM">', html)
+        self.assertIn('<meta property="og:description" content="Since 1996.">', html)
+
+    def test_noindex(self):
+        m.PageSEO.objects.update_or_create(page="contact", defaults={"noindex": True})
+        self.assertContains(self.client.get(reverse("website:contact")), 'content="noindex, nofollow"')
+
+    def test_detail_page_uses_its_own_seo_fields(self):
+        post = m.BlogPost.objects.create(title="A Post", content="<p>Body</p>", excerpt="Short",
+                                         status="published", seo_title="Custom SEO title")
+        html = self.client.get(post.get_absolute_url()).content.decode()
+        self.assertIn("<title>Custom SEO title</title>", html)
+        self.assertIn('<meta property="og:type" content="article">', html)
+        self.assertIn('<meta name="description" content="Short">', html)

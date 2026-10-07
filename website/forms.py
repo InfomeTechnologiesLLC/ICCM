@@ -31,8 +31,14 @@ class NewsletterForm(forms.ModelForm):
         email = self.cleaned_data["email"].strip().lower()
         return email
 
+    def validate_unique(self):
+        # Signing up again with the same address is fine: save() just keeps the
+        # existing row (and reactivates it), instead of showing an error.
+        pass
+
     def save(self, commit=True):
         email = self.cleaned_data["email"]
+        NewsletterSubscriber.objects.filter(email=email, is_active=False).update(is_active=True)
         obj, _ = NewsletterSubscriber.objects.get_or_create(email=email, defaults={"is_active": True})
         return obj
 

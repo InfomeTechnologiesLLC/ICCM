@@ -87,9 +87,10 @@
     <a href="{% url 'cms:course_list' %}" class="{% if current == 'course' %}active{% endif %}"><span class="ico">📚</span> Courses</a>
     <a href="{% url 'cms:faculty_list' %}" class="{% if current == 'faculty' %}active{% endif %}"><span class="ico">🧑‍🏫</span> Teachers</a>
 
-    <h6>Photos</h6>
-    <a href="{% url 'cms:album_list' %}" class="{% if current == 'album' %}active{% endif %}"><span class="ico">🗂️</span> Photo albums</a>
+    <h6>Photos &amp; videos</h6>
+    <a href="{% url 'cms:album_list' %}" class="{% if current == 'album' %}active{% endif %}"><span class="ico">🗂️</span> Albums</a>
     <a href="{% url 'cms:image_list' %}" class="{% if current == 'image' %}active{% endif %}"><span class="ico">📷</span> All photos</a>
+    <a href="{% url 'cms:video_list' %}" class="{% if current == 'video' %}active{% endif %}"><span class="ico">🎬</span> Videos</a>
 
     <h6>News</h6>
     <a href="{% url 'cms:post_list' %}" class="{% if current == 'post' %}active{% endif %}"><span class="ico">📰</span> Blog posts</a>
@@ -97,10 +98,13 @@
 
     <h6>Messages</h6>
     <a href="{% url 'cms:message_list' %}" class="{% if current == 'message' %}active{% endif %}"><span class="ico">✉️</span> Contact messages</a>
+    <a href="{% url 'cms:prayer_list' %}" class="{% if current == 'prayer' %}active{% endif %}"><span class="ico">🙏</span> Prayer list</a>
+    <a href="{% url 'cms:newsletter_list' %}" class="{% if current == 'newsletter' %}active{% endif %}"><span class="ico">📬</span> Newsletter subscribers</a>
 
     <h6>Settings</h6>
     <a href="{% url 'cms:settings' %}" class="{% if current == 'settings' %}active{% endif %}"><span class="ico">⚙️</span> Logo, contact &amp; footer</a>
     <a href="{% url 'cms:menuitem_list' %}" class="{% if current == 'menuitem' %}active{% endif %}"><span class="ico">☰</span> Top menu links</a>
+    <a href="{% url 'cms:pageseo_list' %}" class="{% if current == 'pageseo' %}active{% endif %}"><span class="ico">🔎</span> SEO &amp; sharing</a>
     {% if user.is_superuser %}<a href="{% url 'cms:user_list' %}" class="{% if current == 'user' %}active{% endif %}"><span class="ico">👥</span> Users</a>{% endif %}
     <a href="/django-admin/"><span class="ico">🛠️</span> Advanced admin</a>
     <a href="{% url 'cms:logout' %}"><span class="ico">🚪</span> Log out</a>

@@ -32,10 +32,14 @@
   <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:ministry_list' %}"><span class="ico">🙏</span><span><strong>Update a ministry</strong><span class="small">Fellowship meetings, camps, VBS, ladies' meetings and more.</span></span></a></div>
   <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:event_add' %}"><span class="ico">🗓️</span><span><strong>Add an event</strong><span class="small">A meeting, camp or convention with its date and place.</span></span></a></div>
   <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:image_add' %}"><span class="ico">📷</span><span><strong>Upload a photo</strong><span class="small">Add a picture to one of the gallery albums.</span></span></a></div>
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:video_add' %}"><span class="ico">🎬</span><span><strong>Add a video</strong><span class="small">Paste a YouTube link or upload a short video.</span></span></a></div>
   <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:post_add' %}"><span class="ico">📰</span><span><strong>Write a news post</strong><span class="small">Share a report or story on the Blog page.</span></span></a></div>
   <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:bible_school' %}"><span class="ico">🎓</span><span><strong>Update the ICTC page</strong><span class="small">College text, photos, admissions and courses.</span></span></a></div>
   <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:settings' %}"><span class="ico">⚙️</span><span><strong>Change contact details</strong><span class="small">Email, phone, address, logo and footer.</span></span></a></div>
   <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:message_list' %}"><span class="ico">✉️</span><span><strong>Read contact messages</strong><span class="small">Messages visitors sent through the website.</span></span></a></div>
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:prayer_list' %}"><span class="ico">🙏</span><span><strong>See the prayer list</strong><span class="small">People who joined the prayer list on the Contact page.</span></span></a></div>
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:newsletter_list' %}"><span class="ico">📬</span><span><strong>See newsletter subscribers</strong><span class="small">Emails from the “Stay in touch” box in the footer.</span></span></a></div>
+  <div class="col-md-6 col-xl-4"><a class="task" href="{% url 'cms:pageseo_list' %}"><span class="ico">🔎</span><span><strong>Google &amp; sharing details</strong><span class="small">Meta title, description and share picture for each page.</span></span></a></div>
 </div>
 
 <h2 class="h5 mb-3">Your website at a glance</h2>
@@ -44,6 +48,9 @@
   <div class="col-6 col-lg-3"><a class="task d-block" href="{% url 'cms:event_list' %}"><div class="text-muted small">Events</div><div class="count">{{ total_events }}</div><div class="small text-success">{{ upcoming_events }} upcoming</div></a></div>
   <div class="col-6 col-lg-3"><a class="task d-block" href="{% url 'cms:post_list' %}"><div class="text-muted small">Blog posts</div><div class="count">{{ total_posts }}</div><div class="small text-success">{{ published_posts }} visible</div></a></div>
   <div class="col-6 col-lg-3"><a class="task d-block" href="{% url 'cms:image_list' %}"><div class="text-muted small">Photos</div><div class="count">{{ gallery_images }}</div></a></div>
+  <div class="col-6 col-lg-3"><a class="task d-block" href="{% url 'cms:video_list' %}"><div class="text-muted small">Videos</div><div class="count">{{ gallery_videos }}</div></a></div>
+  <div class="col-6 col-lg-3"><a class="task d-block" href="{% url 'cms:prayer_list' %}"><div class="text-muted small">Prayer list</div><div class="count">{{ prayer_signups }}</div></a></div>
+  <div class="col-6 col-lg-3"><a class="task d-block" href="{% url 'cms:newsletter_list' %}"><div class="text-muted small">Newsletter</div><div class="count">{{ newsletter_signups }}</div><div class="small text-success">subscribed</div></a></div>
 </div>
 
 <div class="row g-4">
@@ -73,6 +80,21 @@
       </ul>
     </div>
   </div>
+</div>
+
+<div class="stat-card mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h6 mb-0">Latest prayer list sign-ups</h2>
+    <a href="{% url 'cms:prayer_list' %}" class="small">See all</a>
+  </div>
+  <ul class="list-unstyled mb-0">
+    {% for p in recent_prayer %}
+    <li class="d-flex justify-content-between gap-2 py-2 border-bottom">
+      <span>{{ p.name }} — <a href="mailto:{{ p.email }}">{{ p.email }}</a></span>
+      <span class="small text-muted">{{ p.created_at|date:"d M Y" }}</span>
+    </li>
+    {% empty %}<li class="text-muted py-2">No sign-ups yet.</li>{% endfor %}
+  </ul>
 </div>
 
 <div class="help-box mt-4">

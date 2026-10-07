@@ -114,6 +114,27 @@ class GalleryImageForm(BootstrapModelForm):
         fields = ["album", "image", "title", "description", "tag", "order"]
 
 
+class GalleryVideoForm(BootstrapModelForm):
+    class Meta:
+        model = m.GalleryVideo
+        fields = ["title", "album", "youtube_url", "video_file", "thumbnail", "description",
+                  "order", "is_active"]
+        widgets = {
+            "youtube_url": forms.URLInput(attrs={"placeholder": "https://www.youtube.com/watch?v=..."}),
+            "video_file": forms.ClearableFileInput(attrs={"accept": "video/mp4,video/webm,video/quicktime,.m4v"}),
+        }
+
+
+class PageSEOForm(BootstrapModelForm):
+    class Meta:
+        model = m.PageSEO
+        exclude = ["page"]
+        widgets = {
+            "meta_description": forms.Textarea(attrs={"rows": 3, "maxlength": 160}),
+            "og_description": forms.Textarea(attrs={"rows": 3, "maxlength": 200}),
+        }
+
+
 class BlogPostForm(BootstrapModelForm):
     class Meta:
         model = m.BlogPost

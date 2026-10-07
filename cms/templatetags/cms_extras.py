@@ -64,6 +64,16 @@ SECTION_HELP = {
               "The Gallery page.", "website:gallery"),
     "image": ("Every photo in the gallery. Choose an album and a category for each photo.",
               "The Gallery page, and the home page.", "website:gallery"),
+    "video": ("Videos on the Gallery page. Paste a YouTube link (best for long videos) or upload a "
+              "short MP4 video. Choose an album to also show the video inside that album.",
+              "The Gallery page, Videos section.", "website:gallery"),
+    "pageseo": ("The title and description Google shows for each main page, and the title, text and "
+                "picture shown when someone shares the page on WhatsApp, Facebook or X. "
+                "For a single ministry, event, blog post or album, open it and use "
+                "“Google search & social sharing” at the bottom of its form.",
+                "Google search results and link previews. Not visible on the page itself.", ""),
+    "prayer": ("People who joined the prayer list on the Contact page.", "", "website:contact"),
+    "newsletter": ("Email addresses entered in the footer “Stay in touch” box.", "", ""),
     "post": ("News articles and reports. Set Visibility to Published to show one on the website.",
              "The Blog page, and the home page.", "website:blog_list"),
     "category": ("Groups for blog posts, such as “Ministry” or “News”.", "The Blog page.",
@@ -136,6 +146,23 @@ FIELD_TEXT = {
     "tag": ("Photo category", "Used by the filter buttons on the Gallery page."),
     "album": (None, "The album this photo belongs to."),
     "value": ("Number", "For example 10, 1996 or 150+"),
+    "seo_title": ("Meta title", "Title shown on Google and when the page is shared. "
+                                "About 50–60 characters. Leave empty to use the normal title."),
+    "seo_description": ("Meta description", "Short text shown under the title on Google and in share "
+                                            "previews. About 150 characters."),
+    "seo_image": ("Share image", "Picture shown when this page is shared on WhatsApp, Facebook or X. "
+                                 "Best size 1200 × 630 pixels. Leave empty to use the main photo."),
+    "default_seo_title": ("Default meta title", "Used on any page that has no meta title of its own."),
+    "default_seo_description": ("Default meta description",
+                                "Used on any page that has no meta description of its own."),
+    "default_seo_image": ("Default share image", "Picture used when a page without its own share image is "
+                                                 "shared. Best size 1200 × 630 pixels."),
+    "default_seo_keywords": ("Default keywords", "Optional. A few words separated by commas."),
+    "google_site_verification": ("Google Search Console code",
+                                 "Optional. In Google Search Console choose “HTML tag” and paste only the "
+                                 "content=\"...\" value here."),
+    "youtube_url": ("YouTube link", "Open the video on YouTube, click Share → Copy, and paste it here. "
+                                    "Leave empty if you upload a video file instead."),
     "year": (None, "A year, or a word such as “Today”."),
 }
 
@@ -162,15 +189,20 @@ def nice_help(field):
 
 @register.filter
 def is_seo(field):
-    return field.name.startswith("seo_") or field.name.startswith("default_seo_")
+    return (field.name.startswith("seo_") or field.name.startswith("default_seo_")
+            or field.name == "google_site_verification")
 
 
-THUMB_FIELDS = ("image", "main_image", "featured_image", "cover_image", "photo", "background_image")
+THUMB_FIELDS = ("image", "main_image", "featured_image", "cover_image", "photo", "background_image",
+                "thumbnail", "og_image")
 
 
 @register.filter
 def thumb(obj):
     """URL of the first photo on an object, for list previews."""
+    preview = getattr(obj, "preview_url", "")
+    if isinstance(preview, str) and preview:
+        return preview
     for name in THUMB_FIELDS:
         f = getattr(obj, name, None)
         if f and hasattr(f, "url"):

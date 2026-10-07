@@ -13,13 +13,23 @@
   </div>
 </section>
 
+{% if videos %}
+<section class="section-sm" id="videos">
+  <div class="shell">
+    <h2 class="headline-lg mb-4">Videos</h2>
+    {% include "partials/gallery_videos.html" %}
+  </div>
+</section>
+{% endif %}
+
 <section class="section">
   <div class="shell">
+    {% if videos %}<h2 class="headline-lg mb-4">Photos</h2>{% endif %}
     <div class="gallery">
       {% for img in images %}
       <a href="{{ img.image.url }}" data-lightbox="{{ img.image.url }}" data-caption="{{ img.title }}"><img src="{{ img.image.url }}" alt="{{ img.title }}" loading="lazy"></a>
       {% empty %}
-      <p class="text-muted-warm">No photos in this album yet.</p>
+      {% if not videos %}<p class="text-muted-warm">No photos in this album yet.</p>{% endif %}
       {% endfor %}
     </div>
   </div>

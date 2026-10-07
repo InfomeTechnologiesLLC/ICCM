@@ -1,4 +1,8 @@
+import re
+
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -97,6 +101,8 @@ class SiteSettings(models.Model):
     default_seo_title = models.CharField(max_length=70, blank=True)
     default_seo_description = models.CharField(max_length=160, blank=True)
     default_seo_image = models.ImageField(upload_to="seo/", blank=True, null=True)
+    default_seo_keywords = models.CharField(max_length=255, blank=True)
+    google_site_verification = models.CharField(max_length=100, blank=True)
 
     class Meta:
         verbose_name = "Site Settings"
@@ -541,7 +547,7 @@ class EventImage(models.Model):
 # Gallery
 # ============================================================================
 
-class GalleryAlbum(AuditedModel):
+class GalleryAlbum(AuditedModel, SEOFieldsMixin):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=220, unique=True, blank=True)
     description = models.TextField(blank=True)
@@ -583,6 +589,86 @@ class GalleryImage(models.Model):
 
     def __str__(self):
         return self.title or f"Image #{self.pk}"
+
+
+YOUTUBE_ID_RE = re.compile(
+    r"(?:youtube(?:-nocookie)?\.com/(?:watch\?(?:.*&)?v=|embed/|shorts/|live/|v/)|youtu\.be/)"
+    r"([A-Za-z0-9_-]{11})"
+)
+
+
+def youtube_id_from_url(url):
+    """'https://www.youtube.com/watch?v=abc123DEF45' -> 'abc123DEF45'.
+    Works for watch, youtu.be, shorts, live and embed links. '' if not found."""
+    match = YOUTUBE_ID_RE.search(url or "")
+    return match.group(1) if match else ""
+
+
+def validate_video_size(f):
+    limit_mb = getattr(settings, "MAX_VIDEO_UPLOAD_MB", 100)
+    if f.size > limit_mb * 1024 * 1024:
+        raise ValidationError(
+            f"This video is too large ({f.size // (1024 * 1024)} MB). The limit is {limit_mb} MB. "
+            "For long videos, upload them to YouTube and paste the link instead.")
+
+
+class GalleryVideo(models.Model):
+    """A video on the Gallery page: either a YouTube link or an uploaded video file."""
+    album = models.ForeignKey(GalleryAlbum, related_name="videos", on_delete=models.SET_NULL,
+                              null=True, blank=True)
+    title = models.CharField(max_length=200)
+    description = models.CharField(max_length=255, blank=True)
+    youtube_url = models.URLField("YouTube link", blank=True,
+        help_text="Paste the link from YouTube (Share → Copy link). Leave empty if you upload a video file below.")
+    video_file = models.FileField("Video file", upload_to="gallery/videos/", blank=True, null=True,
+        validators=[FileExtensionValidator(["mp4", "webm", "mov", "m4v"]), validate_video_size],
+        help_text="MP4 works on every phone and browser. Leave empty if you pasted a YouTube link.")
+    thumbnail = models.ImageField("Cover photo", upload_to="gallery/videos/covers/", blank=True, null=True,
+        help_text="Optional. Shown before the video plays. YouTube videos use YouTube's own picture if this is empty.")
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["order", "-created_at"]
+        verbose_name = "Gallery video"
+
+    def __str__(self):
+        return self.title
+
+    def clean(self):
+        if self.youtube_url and not youtube_id_from_url(self.youtube_url):
+            raise ValidationError({"youtube_url": "This doesn't look like a YouTube video link. "
+                                   "Open the video on YouTube, click Share, then Copy, and paste it here."})
+        if not self.youtube_url and not self.video_file:
+            raise ValidationError("Paste a YouTube link or upload a video file.")
+        if self.youtube_url and self.video_file:
+            raise ValidationError("Use either a YouTube link or a video file, not both.")
+
+    @property
+    def youtube_id(self):
+        return youtube_id_from_url(self.youtube_url)
+
+    @property
+    def is_youtube(self):
+        return bool(self.youtube_id)
+
+    @property
+    def embed_url(self):
+        return f"https://www.youtube-nocookie.com/embed/{self.youtube_id}?autoplay=1&rel=0" if self.is_youtube else ""
+
+    @property
+    def preview_url(self):
+        """Cover picture for lists and the gallery grid."""
+        if self.thumbnail:
+            return self.thumbnail.url
+        if self.is_youtube:
+            return f"https://i.ytimg.com/vi/{self.youtube_id}/hqdefault.jpg"
+        return ""
+
+    @property
+    def source_label(self):
+        return "YouTube" if self.is_youtube else "Uploaded video"
 
 
 # ============================================================================
@@ -698,6 +784,62 @@ class PrayerListSignup(TimeStampedModel):
 
     def __str__(self):
         return f"{self.name} <{self.email}>"
+
+
+# ============================================================================
+# Search engine & social sharing details for each main page
+# ============================================================================
+
+class PageSEO(models.Model):
+    """Meta and Open Graph (Facebook / WhatsApp / X preview) details for the main
+    website pages. Detail pages (a ministry, event, post, album) use the
+    "Google search settings" fields on their own edit screen instead."""
+    PAGE_CHOICES = [
+        ("home", "Home"),
+        ("about", "About"),
+        ("ministry_list", "Ministries"),
+        ("bible_school", "ICTC"),
+        ("event_list", "Events"),
+        ("gallery", "Gallery"),
+        ("blog_list", "Blog"),
+        ("contact", "Contact"),
+        ("church_list", "Churches"),
+    ]
+    PAGE_PATHS = {
+        "home": "/", "about": "/about/", "ministry_list": "/ministries/",
+        "bible_school": "/bible-school/", "event_list": "/events/", "gallery": "/gallery/",
+        "blog_list": "/blog/", "contact": "/contact/", "church_list": "/churches/",
+    }
+
+    page = models.CharField(max_length=30, choices=PAGE_CHOICES, unique=True)
+    meta_title = models.CharField(max_length=70, blank=True,
+        help_text="The title shown in the browser tab and on Google. About 50–60 characters is best. "
+                  "Leave empty to use the normal page title.")
+    meta_description = models.CharField(max_length=160, blank=True,
+        help_text="The short text under the title on Google. About 150 characters is best.")
+    meta_keywords = models.CharField(max_length=255, blank=True,
+        help_text="Optional. A few words separated by commas, e.g. church of Christ, Punjab, Kerala.")
+    og_title = models.CharField("Share title", max_length=95, blank=True,
+        help_text="Title shown when this page is shared on WhatsApp, Facebook or X. Leave empty to use the meta title.")
+    og_description = models.CharField("Share description", max_length=200, blank=True,
+        help_text="Text shown when this page is shared. Leave empty to use the meta description.")
+    og_image = models.ImageField("Share image", upload_to="seo/", blank=True, null=True,
+        help_text="Picture shown when this page is shared. Best size 1200 × 630 pixels. "
+                  "Leave empty to use the default share image from Website Settings.")
+    noindex = models.BooleanField("Hide from Google", default=False,
+        help_text="Tick only if this page should not appear in Google search results.")
+
+    class Meta:
+        ordering = ["id"]
+        verbose_name = "Page SEO"
+        verbose_name_plural = "Page SEO"
+
+    def __str__(self):
+        return self.get_page_display()
+
+    @property
+    def path(self):
+        return self.PAGE_PATHS.get(self.page, "/")
 
 
 # ============================================================================

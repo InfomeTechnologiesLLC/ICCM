@@ -162,6 +162,18 @@ class GalleryImageAdmin(admin.ModelAdmin):
     list_filter = ("tag", "album")
 
 
+@admin.register(m.GalleryVideo)
+class GalleryVideoAdmin(admin.ModelAdmin):
+    list_display = ("title", "source_label", "album", "order", "is_active")
+    list_filter = ("is_active", "album")
+    search_fields = ("title", "description")
+
+
+@admin.register(m.PageSEO)
+class PageSEOAdmin(admin.ModelAdmin):
+    list_display = ("page", "meta_title", "noindex")
+
+
 @admin.register(m.BlogCategory)
 class BlogCategoryAdmin(admin.ModelAdmin):
     list_display = ("name",)
@@ -194,11 +206,13 @@ class ContactMessageAdmin(admin.ModelAdmin):
 @admin.register(m.NewsletterSubscriber)
 class NewsletterSubscriberAdmin(admin.ModelAdmin):
     list_display = ("email", "is_active", "created_at")
+    search_fields = ("email",)
 
 
 @admin.register(m.PrayerListSignup)
 class PrayerListSignupAdmin(admin.ModelAdmin):
     list_display = ("name", "email", "created_at")
+    search_fields = ("name", "email")
 
 
 @admin.register(m.FlatPage)

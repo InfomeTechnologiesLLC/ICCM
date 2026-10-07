@@ -59,6 +59,15 @@ urlpatterns = [
     path("gallery/images/<int:pk>/edit/", v.GalleryImageUpdateView.as_view(), name="image_edit"),
     path("gallery/images/<int:pk>/delete/", v.GalleryImageDeleteView.as_view(), name="image_delete"),
 
+    path("gallery/videos/", v.GalleryVideoListView.as_view(), name="video_list"),
+    path("gallery/videos/add/", v.GalleryVideoCreateView.as_view(), name="video_add"),
+    path("gallery/videos/<int:pk>/edit/", v.GalleryVideoUpdateView.as_view(), name="video_edit"),
+    path("gallery/videos/<int:pk>/delete/", v.GalleryVideoDeleteView.as_view(), name="video_delete"),
+
+    # Page SEO / social sharing
+    path("seo/", v.PageSEOListView.as_view(), name="pageseo_list"),
+    path("seo/<int:pk>/edit/", v.PageSEOUpdateView.as_view(), name="pageseo_edit"),
+
     # Blog
     path("blog/posts/", v.BlogPostListView.as_view(), name="post_list"),
     path("blog/posts/add/", v.BlogPostCreateView.as_view(), name="post_add"),
@@ -98,6 +107,8 @@ urlpatterns = [
     # Contact messages
     path("messages/", v.ContactMessageListView.as_view(), name="message_list"),
     path("messages/<int:pk>/", v.ContactMessageDetailView.as_view(), name="message_detail"),
+    path("signups/prayer/", v.PrayerListView.as_view(), name="prayer_list"),
+    path("signups/newsletter/", v.NewsletterListView.as_view(), name="newsletter_list"),
 
     # Users (superuser only; full management stays in /django-admin/)
     path("users/", v.UserListView.as_view(), name="user_list"),

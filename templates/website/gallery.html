@@ -33,8 +33,19 @@
 </section>
 {% endif %}
 
-<section class="section">
+{% if videos and active_filter == 'all' %}
+<section class="section-sm" id="videos">
   <div class="shell">
+    <span class="eyebrow d-block mb-2">Watch</span>
+    <h2 class="headline-lg mb-4">Videos</h2>
+    {% include "partials/gallery_videos.html" %}
+  </div>
+</section>
+{% endif %}
+
+<section class="section" id="photos">
+  <div class="shell">
+    {% if videos and active_filter == 'all' %}<h2 class="headline-lg mb-4">Photos</h2>{% endif %}
     <div class="d-flex flex-wrap gap-2 mb-4" data-filter-group="gallery">
       <a href="?" class="chip chip-filter{% if active_filter == 'all' %} is-active{% endif %}">All</a>
       {% for value, label in images.model.TAG_CHOICES %}

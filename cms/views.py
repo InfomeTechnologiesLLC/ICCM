@@ -1,7 +1,13 @@
+import csv
+
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, ListView, TemplateView, UpdateView, View
@@ -45,6 +51,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "gallery_images": m.GalleryImage.objects.count(),
             "total_messages": m.ContactMessage.objects.count(),
             "unread_messages": m.ContactMessage.objects.filter(status="unread").count(),
+            "gallery_videos": m.GalleryVideo.objects.count(),
+            "prayer_signups": m.PrayerListSignup.objects.count(),
+            "newsletter_signups": m.NewsletterSubscriber.objects.filter(is_active=True).count(),
+            "recent_prayer": m.PrayerListSignup.objects.order_by("-created_at")[:5],
             "total_pages": m.FlatPage.objects.count(),
             "recent_messages": m.ContactMessage.objects.all()[:5],
             "recent_posts": m.BlogPost.objects.all()[:5],
@@ -443,6 +453,136 @@ FacultyListView, FacultyCreateView, FacultyUpdateView, FacultyDeleteView = _simp
 MenuItemListView, MenuItemCreateView, MenuItemUpdateView, MenuItemDeleteView = _simple_crud(
     m.MenuItem, f.MenuItemForm, "Menu Items", [("Label", "label"), ("URL", "url"), ("Order", "order"), ("Active", "is_active")],
     "menuitem", "menuitem")
+
+
+GalleryVideoListView, GalleryVideoCreateView, GalleryVideoUpdateView, GalleryVideoDeleteView = _simple_crud(
+    m.GalleryVideo, f.GalleryVideoForm, "Videos",
+    [("Title", "title"), ("Type", "source_label"), ("Album", "album"), ("Position", "order"), ("Shown", "is_active")],
+    "video", "galleryvideo")
+
+
+# ---------------------------------------------------------------------------
+# Page SEO (meta + social sharing details for each main page)
+# ---------------------------------------------------------------------------
+
+class PageSEOListView(CMSListView):
+    model = m.PageSEO
+    title = "Page SEO & sharing"
+    permission_required = "website.view_pageseo"
+    paginate_by = 50
+    columns = [("Page", "get_page_display"), ("Web address", "path"), ("Meta title", "meta_title"),
+               ("Meta description", "meta_description"), ("Hidden from Google", "noindex")]
+    edit_url_name = "cms:pageseo_edit"
+
+    def get_queryset(self):
+        # Make sure every page has a row, even if new pages were added later.
+        for key, _ in m.PageSEO.PAGE_CHOICES:
+            m.PageSEO.objects.get_or_create(page=key)
+        return m.PageSEO.objects.all()
+
+
+class PageSEOUpdateView(CMSUpdateView):
+    model = m.PageSEO
+    form_class = f.PageSEOForm
+    permission_required = "website.change_pageseo"
+    success_url = reverse_lazy("cms:pageseo_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["title"] = f"SEO & sharing — {self.object.get_page_display()} page"
+        ctx["page_link"] = self.object.path
+        return ctx
+
+
+# ---------------------------------------------------------------------------
+# Website sign-ups: prayer list and newsletter
+# ---------------------------------------------------------------------------
+
+class SignupListView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    """Read-only list of people who signed up through the website, with search,
+    CSV download (for Excel / Gmail) and delete."""
+    template_name = "cms/signups_list.html"
+    model = None
+    title = ""
+    intro = ""
+    columns = []          # (label, attribute)
+    search_fields = []
+    export_fields = []    # (header, attribute)
+    url_name = ""
+
+    def get_permission_required(self):
+        return [f"website.view_{self.model._meta.model_name}"]
+
+    def get_queryset(self):
+        qs = self.model.objects.order_by("-created_at")
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            cond = Q()
+            for field in self.search_fields:
+                cond |= Q(**{f"{field}__icontains": q})
+            qs = qs.filter(cond)
+        return qs, q
+
+    def get(self, request):
+        qs, q = self.get_queryset()
+        if request.GET.get("export") == "csv":
+            return self.export_csv(qs)
+        page_obj = Paginator(qs, 50).get_page(request.GET.get("page"))
+        rows = [(obj, [getattr(obj, attr) for _, attr in self.columns]) for obj in page_obj]
+        can_delete = request.user.has_perm(f"website.delete_{self.model._meta.model_name}")
+        return render(request, self.template_name, {
+            "title": self.title, "intro": self.intro, "columns": self.columns, "rows": rows,
+            "page_obj": page_obj, "query": q, "total": self.model.objects.count(),
+            "can_delete": can_delete, "url_name": self.url_name,
+        })
+
+    def post(self, request):
+        if not request.user.has_perm(f"website.delete_{self.model._meta.model_name}"):
+            raise PermissionDenied
+        ids = request.POST.getlist("ids")
+        if ids:
+            deleted, _ = self.model.objects.filter(pk__in=ids).delete()
+            messages.success(request, f"Removed {deleted} entr{'y' if deleted == 1 else 'ies'}.")
+        return redirect(self.url_name)
+
+    def export_csv(self, qs):
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        stamp = timezone.localdate().isoformat()
+        response["Content-Disposition"] = f'attachment; filename="{self.model._meta.model_name}-{stamp}.csv"'
+        response.write("\ufeff")  # so Excel opens names with Indian-language characters correctly
+        writer = csv.writer(response)
+        writer.writerow([h for h, _ in self.export_fields])
+        for obj in qs:
+            row = []
+            for _, attr in self.export_fields:
+                val = getattr(obj, attr)
+                if hasattr(val, "strftime"):
+                    val = timezone.localtime(val).strftime("%d-%m-%Y %H:%M")
+                elif isinstance(val, bool):
+                    val = "Yes" if val else "No"
+                row.append(val)
+            writer.writerow(row)
+        return response
+
+
+class PrayerListView(SignupListView):
+    model = m.PrayerListSignup
+    title = "Prayer list sign-ups"
+    intro = "People who filled in “Join the Prayer List” on the Contact page."
+    columns = [("Name", "name"), ("Email", "email"), ("Signed up", "created_at")]
+    search_fields = ["name", "email"]
+    export_fields = [("Name", "name"), ("Email", "email"), ("Signed up", "created_at")]
+    url_name = "cms:prayer_list"
+
+
+class NewsletterListView(SignupListView):
+    model = m.NewsletterSubscriber
+    title = "Newsletter subscribers"
+    intro = "Email addresses entered in the “Stay in touch” box in the footer of every page."
+    columns = [("Email", "email"), ("Subscribed", "is_active"), ("Signed up", "created_at")]
+    search_fields = ["email"]
+    export_fields = [("Email", "email"), ("Subscribed", "is_active"), ("Signed up", "created_at")]
+    url_name = "cms:newsletter_list"
 
 
 # ---------------------------------------------------------------------------
