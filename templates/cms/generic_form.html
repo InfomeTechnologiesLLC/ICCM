@@ -18,6 +18,20 @@
     padding: .9rem 1.25rem; margin: 1rem -1.25rem -1.25rem; border-radius: 0 0 1rem 1rem;
     display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; z-index: 5; }
   details.seo summary { cursor: pointer; font-weight: 600; padding: .75rem 0; }
+
+  /* Upload progress */
+  .upload-overlay { position: fixed; inset: 0; z-index: 2000; background: rgba(20,38,31,.55);
+    display: none; align-items: center; justify-content: center; padding: 1rem; }
+  .upload-overlay.show { display: flex; }
+  .upload-box { background: #fff; border-radius: 1rem; padding: 1.5rem; width: 100%; max-width: 30rem;
+    box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+  .upload-box .progress { height: 1.1rem; border-radius: 1rem; background: #eee8de; }
+  .upload-box .progress-bar { background: var(--brass); color: var(--forest); font-weight: 700; font-size: .75rem;
+    transition: width .2s ease; }
+  .upload-box .file-name { word-break: break-all; }
+  .upload-box.is-error .progress-bar { background: #b3261e; color: #fff; }
+  .file-warning { color: #b3261e; font-weight: 600; font-size: .9rem; margin-top: .4rem; }
+  .btn-saving { pointer-events: none; opacity: .8; }
 </style>
 {% endblock %}
 
@@ -80,6 +94,22 @@
       {% endif %}{% endfor %}
     </details>
 
+    <div class="upload-overlay" id="uploadOverlay" role="dialog" aria-modal="true" aria-labelledby="uploadTitle">
+      <div class="upload-box" id="uploadBox">
+        <h2 class="h5 mb-1" id="uploadTitle">Uploading…</h2>
+        <p class="small text-muted mb-3 file-name" id="uploadFile"></p>
+        <div class="progress mb-2" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="uploadProgress">
+          <div class="progress-bar" id="uploadBar" style="width:0%">0%</div>
+        </div>
+        <p class="small mb-1" id="uploadStats" aria-live="polite">Starting…</p>
+        <p class="small text-muted mb-3" id="uploadNote">Please keep this page open until the upload finishes.</p>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="uploadCancel">Cancel upload</button>
+          <button type="button" class="btn btn-dark btn-sm" id="uploadClose" hidden>Close</button>
+        </div>
+      </div>
+    </div>
+
     <div class="save-bar">
       <button type="submit" class="btn btn-dark px-4">Save changes</button>
       <a href="javascript:history.back()" class="btn btn-outline-secondary">Cancel</a>
@@ -132,13 +162,168 @@
     }
   });
 
-  // Warn before leaving with unsaved changes
-  var dirty = false;
+  // Warn before leaving with unsaved changes (or while a file is uploading)
+  var dirty = false, uploading = false;
   form.addEventListener('input', function () { dirty = true; });
   form.addEventListener('change', function () { dirty = true; });
-  form.addEventListener('submit', function () { dirty = false; });
   window.addEventListener('beforeunload', function (e) {
-    if (dirty) { e.preventDefault(); e.returnValue = ''; }
+    if (dirty || uploading) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  // ---------------------------------------------------------------------
+  // Size check before uploading, and a progress screen while uploading
+  // ---------------------------------------------------------------------
+  function mb(bytes) { return (bytes / 1048576).toFixed(bytes < 10485760 ? 1 : 0) + ' MB'; }
+  function secs(s) {
+    if (!isFinite(s) || s < 0) return '';
+    if (s < 60) return Math.ceil(s) + ' sec';
+    return Math.floor(s / 60) + ' min ' + Math.ceil(s % 60) + ' sec';
+  }
+
+  function checkSize(input) {
+    var max = parseFloat(input.getAttribute('data-max-mb'));
+    var old = input.parentNode.querySelector('.file-warning');
+    if (old) old.remove();
+    var f = input.files && input.files[0];
+    if (!max || !f || f.size <= max * 1048576) return true;
+    var w = document.createElement('div');
+    w.className = 'file-warning';
+    w.textContent = 'This file is ' + mb(f.size) + '. The limit is ' + max + ' MB. ' +
+      'Please choose a smaller file, or upload it to YouTube and paste the link above.';
+    input.parentNode.appendChild(w);
+    return false;
+  }
+  form.querySelectorAll('input[type=file][data-max-mb]').forEach(function (input) {
+    input.addEventListener('change', function () { checkSize(input); });
+  });
+
+  var overlay = document.getElementById('uploadOverlay');
+  var box = document.getElementById('uploadBox');
+  var bar = document.getElementById('uploadBar');
+  var barWrap = document.getElementById('uploadProgress');
+  var titleEl = document.getElementById('uploadTitle');
+  var fileEl = document.getElementById('uploadFile');
+  var stats = document.getElementById('uploadStats');
+  var note = document.getElementById('uploadNote');
+  var cancelBtn = document.getElementById('uploadCancel');
+  var closeBtn = document.getElementById('uploadClose');
+  var submitBtn = form.querySelector('button[type=submit]');
+  var xhr = null;
+
+  function setBar(pct) {
+    pct = Math.max(0, Math.min(100, Math.round(pct)));
+    bar.style.width = pct + '%';
+    bar.textContent = pct + '%';
+    barWrap.setAttribute('aria-valuenow', pct);
+  }
+  function resetButton() {
+    submitBtn.classList.remove('btn-saving');
+    submitBtn.textContent = 'Save changes';
+  }
+  function fail(title, message) {
+    uploading = false;
+    box.classList.add('is-error');
+    titleEl.textContent = title;
+    stats.textContent = message;
+    note.textContent = 'Nothing was saved. You can close this box and try again.';
+    cancelBtn.hidden = true;
+    closeBtn.hidden = false;
+    closeBtn.focus();
+    resetButton();
+  }
+  closeBtn.addEventListener('click', function () {
+    overlay.classList.remove('show');
+    box.classList.remove('is-error');
+  });
+  cancelBtn.addEventListener('click', function () {
+    if (xhr) xhr.abort();
+  });
+
+  form.addEventListener('submit', function (e) {
+    // Block files that are over the limit before sending anything
+    var tooBig = false;
+    form.querySelectorAll('input[type=file][data-max-mb]').forEach(function (input) {
+      if (!checkSize(input)) tooBig = true;
+    });
+    if (tooBig) {
+      e.preventDefault();
+      form.querySelector('.file-warning').scrollIntoView({ block: 'center' });
+      return;
+    }
+
+    var total = 0, names = [];
+    form.querySelectorAll('input[type=file]').forEach(function (input) {
+      if (input.files && input.files[0]) { total += input.files[0].size; names.push(input.files[0].name); }
+    });
+
+    dirty = false;
+    submitBtn.classList.add('btn-saving');
+    submitBtn.textContent = 'Saving…';
+
+    // Small or no files: normal save, just show "Saving…" on the button
+    if (total < 2 * 1048576 || !window.XMLHttpRequest || !window.FormData) return;
+
+    // Bigger files: send with a progress screen
+    e.preventDefault();
+    uploading = true;
+    box.classList.remove('is-error');
+    titleEl.textContent = 'Uploading…';
+    fileEl.textContent = names.join(', ') + ' (' + mb(total) + ')';
+    note.textContent = 'Please keep this page open until the upload finishes.';
+    stats.textContent = 'Starting…';
+    cancelBtn.hidden = false;
+    closeBtn.hidden = true;
+    setBar(0);
+    overlay.classList.add('show');
+
+    var started = Date.now();
+    xhr = new XMLHttpRequest();
+    xhr.open('POST', form.getAttribute('action') || window.location.href);
+
+    xhr.upload.onprogress = function (ev) {
+      if (!ev.lengthComputable) { stats.textContent = mb(ev.loaded) + ' sent…'; return; }
+      var pct = ev.loaded / ev.total * 100;
+      var elapsed = (Date.now() - started) / 1000;
+      var speed = elapsed > 0 ? ev.loaded / elapsed : 0;
+      var left = speed > 0 ? (ev.total - ev.loaded) / speed : NaN;
+      setBar(pct);
+      stats.textContent = mb(ev.loaded) + ' of ' + mb(ev.total) +
+        (speed ? ' · ' + mb(speed) + '/s' : '') +
+        (left > 1 ? ' · about ' + secs(left) + ' left' : '');
+    };
+    xhr.upload.onload = function () {
+      setBar(100);
+      titleEl.textContent = 'Upload finished — saving…';
+      stats.textContent = 'The server is saving the file. This can take a few seconds.';
+      cancelBtn.hidden = true;
+    };
+    xhr.onload = function () {
+      uploading = false;
+      if (xhr.status === 413) {
+        fail('File too large for the server',
+             'The web server refused this file because it is too big. Make the video smaller, or upload it to YouTube and paste the link.');
+        return;
+      }
+      if (xhr.status >= 500) {
+        fail('The server had a problem', 'Error ' + xhr.status + ' while saving. Please try again in a minute.');
+        return;
+      }
+      // Show the page the server sent back (the list with "Saved", or this form with any red messages)
+      var url = xhr.responseURL || window.location.href;
+      document.open();
+      document.write(xhr.responseText);
+      document.close();
+      if (window.history && history.replaceState) history.replaceState(null, '', url);
+    };
+    xhr.onerror = function () {
+      fail('Upload stopped',
+           'The connection to the server was closed before the upload finished. This usually means the file is bigger ' +
+           'than the web server allows, or the internet connection dropped. Try a smaller file, or upload long videos to YouTube.');
+    };
+    xhr.onabort = function () {
+      fail('Upload cancelled', 'You cancelled the upload.');
+    };
+    xhr.send(new FormData(form));
   });
 
   // Jump to the first error

@@ -124,6 +124,16 @@ class GalleryVideoForm(BootstrapModelForm):
             "video_file": forms.ClearableFileInput(attrs={"accept": "video/mp4,video/webm,video/quicktime,.m4v"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Lets the page check the size before uploading, instead of after.
+        from django.conf import settings
+        limit = getattr(settings, "MAX_VIDEO_UPLOAD_MB", 100)
+        self.fields["video_file"].widget.attrs["data-max-mb"] = limit
+        self.fields["video_file"].help_text = (
+            f"MP4 works on every phone and browser. Up to {limit} MB. "
+            "Leave empty if you pasted a YouTube link. Long videos are better on YouTube.")
+
 
 class PageSEOForm(BootstrapModelForm):
     class Meta:
